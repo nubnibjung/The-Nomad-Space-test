@@ -7815,3 +7815,6 @@ input:focus-visible {
   border-bottom-color: transparent !important;
   box-shadow: none !important;
 }
+.search-field-highlight {
+  transition: none !important;
+}
