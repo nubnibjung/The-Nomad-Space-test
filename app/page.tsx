@@ -39,6 +39,7 @@ export default function DiscoveryPage() {
     return storedName ?? "";
   });
   const [isMapVisible, setIsMapVisible] = useState(false);
+  const [serviceType, setServiceType] = useState<string | null>(null);
   const [resultsSection, setResultsSection] = useState<ListingSection | null>(null);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
   const [wishlistPendingId, setWishlistPendingId] = useState<string | null>(null);
@@ -61,7 +62,7 @@ export default function DiscoveryPage() {
     isScrolled,
     savedIds, handleSaveToggle,
   } = useDiscovery();
-  const sections = buildListingSections(listings.length > 0 ? listings : LISTINGS, activeCategory);
+  const sections = buildListingSections(listings.length > 0 ? listings : LISTINGS, activeCategory, serviceType);
   const activeResultsSection = resultsSection
     ? {
         ...resultsSection,
@@ -143,6 +144,7 @@ export default function DiscoveryPage() {
         onQueryChange={handleQueryChange}
         onCategoryChange={(id) => {
           setResultsSection(null);
+          setServiceType(null);
           handleCategoryChange(id);
         }}
         onDateChange={handleDateChange}
@@ -150,6 +152,8 @@ export default function DiscoveryPage() {
         onSearchOpen={setIsSearchOpen}
         onSearchReset={() => handleSearchReset({ keepSearchOpen: true })}
         onNearby={handleNearby}
+        serviceType={serviceType}
+        onServiceChange={setServiceType}
       />
 
       <section className={`nomad-layout${isMapVisible ? "" : " is-map-hidden"}`} aria-live="polite">
@@ -485,10 +489,13 @@ function ResultsView({
   );
 }
 
-function buildListingSections(listings: Listing[], activeCategory: string) {
+function buildListingSections(listings: Listing[], activeCategory: string, serviceType: string | null = null) {
   if (listings.length === 0) return [];
 
-  const sectionListings = activeCategory === "loft" ? buildExperienceListings(listings) : listings;
+  const sectionListings =
+    activeCategory === "loft" ? buildExperienceListings(listings)
+    : activeCategory === "coffee" ? buildServiceListings(listings, serviceType)
+    : listings;
   const filledListings = fillListingRow(sectionListings, 7);
   const areaName = getDominantAreaName(listings);
   const sectionCopy = getSectionCopy(activeCategory, areaName);
@@ -592,6 +599,128 @@ function buildExperienceListings(listings: Listing[]) {
       neighborhood: content.neighborhood,
       pricePerNight: content.pricePerNight,
       images: content.images,
+    };
+  });
+}
+
+const SERVICE_CARD_CONTENT = [
+  {
+    serviceType: "photography",
+    title: "ช่างภาพมืออาชีพ ถ่ายโปรไฟล์และอีเวนต์",
+    neighborhood: "Bangkok, ไทย",
+    pricePerNight: 1500,
+    images: [
+      "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1606986628253-05620e9b1c43?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "chef",
+    title: "เชฟส่วนตัว ทำอาหารถึงที่พัก",
+    neighborhood: "Ari, ไทย",
+    pricePerNight: 2200,
+    images: [
+      "https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "massage",
+    title: "นวดผ่อนคลายสไตล์ไทย ถึงห้องพัก",
+    neighborhood: "Thong Lo, ไทย",
+    pricePerNight: 1200,
+    images: [
+      "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "meals",
+    title: "อาหารปรุงสำเร็จพร้อมเสิร์ฟจากครัวท้องถิ่น",
+    neighborhood: "Sukhumvit, ไทย",
+    pricePerNight: 850,
+    images: [
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "fitness",
+    title: "เทรนเนอร์ส่วนตัว ออกกำลังกายถึงที่",
+    neighborhood: "Sathorn, ไทย",
+    pricePerNight: 1100,
+    images: [
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "makeup",
+    title: "ช่างแต่งหน้ามืออาชีพ สำหรับทุกโอกาส",
+    neighborhood: "Siam, ไทย",
+    pricePerNight: 1600,
+    images: [
+      "https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "hair",
+    title: "ช่างทำผมถึงที่พัก ก่อนงานสำคัญ",
+    neighborhood: "Phrom Phong, ไทย",
+    pricePerNight: 1300,
+    images: [
+      "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "spa",
+    title: "ทรีตเมนต์สปาครบวงจร ในที่พัก",
+    neighborhood: "Riverside, ไทย",
+    pricePerNight: 1900,
+    images: [
+      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+  {
+    serviceType: "catering",
+    title: "บริการจัดเลี้ยง สำหรับงานและทีม",
+    neighborhood: "Yaowarat, ไทย",
+    pricePerNight: 2600,
+    images: [
+      "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&q=80",
+      "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&w=900&q=80",
+    ],
+  },
+];
+
+function buildServiceListings(listings: Listing[], serviceType: string | null) {
+  const matched = serviceType
+    ? SERVICE_CARD_CONTENT.filter((service) => service.serviceType === serviceType)
+    : SERVICE_CARD_CONTENT;
+  const content = matched.length > 0 ? matched : SERVICE_CARD_CONTENT;
+
+  return content.map((service, index) => {
+    const base = listings[index % listings.length];
+
+    return {
+      ...base,
+      id: `svc_${service.serviceType}_${index}`,
+      title: service.title,
+      neighborhood: service.neighborhood,
+      pricePerNight: service.pricePerNight,
+      images: service.images,
     };
   });
 }

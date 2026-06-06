@@ -27,11 +27,14 @@ type Props = {
   onSearchOpen: (open: boolean) => void;
   onSearchReset: () => void;
   onNearby: () => void;
+  serviceType: string | null;
+  onServiceChange: (key: string | null) => void;
 };
 
 export function Header({
   query, activeCategory, selectedDate, guestCounts, isSearchOpen, isScrolled,
   onQueryChange, onCategoryChange, onDateChange, onGuestChange, onSearchOpen, onSearchReset, onNearby,
+  serviceType, onServiceChange,
 }: Props) {
   const { data: session, status } = useSession();
   const { t } = useLanguage();
@@ -70,7 +73,7 @@ export function Header({
     let resizeObserver: ResizeObserver | null = null;
 
     function measureActiveField() {
-      const activeFieldEl = pill.querySelector<HTMLElement>(".search-field.is-active");
+      const activeFieldEl = pill?.querySelector<HTMLElement>(".search-field.is-active");
       setHighlightStyle(
         activeFieldEl ? { left: activeFieldEl.offsetLeft, width: activeFieldEl.offsetWidth } : null,
       );
@@ -110,7 +113,8 @@ export function Header({
   const dateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.addDates;
   const compactDateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.anytime;
   const rightSearchLabel = isServiceSearch ? t.search.serviceType : t.search.who;
-  const rightSearchSummary = isServiceSearch ? t.search.addService : guestSummary;
+  const selectedServiceLabel = t.search.serviceOptions.find((option) => option.key === serviceType)?.label;
+  const rightSearchSummary = isServiceSearch ? (selectedServiceLabel ?? t.search.addService) : guestSummary;
   const activeField = isSearchOpen ? activeSearchStep : null;
 
   function openSearchStep(step: SearchStep) {
@@ -284,8 +288,17 @@ export function Header({
               className={`search-field${activeField === "where" ? " is-active" : ""}${query ? " has-value" : ""}`}
               onClick={(e) => {
                 const input = e.currentTarget.querySelector("input");
-                if (input && document.activeElement !== input) {
-                  input.focus();
+                if (!isSearchOpen) {
+                  openSearchStep("where");
+                  if (input) {
+                    setTimeout(() => {
+                      input.focus();
+                    }, 50);
+                  }
+                } else {
+                  if (input && document.activeElement !== input) {
+                    input.focus();
+                  }
                 }
               }}
             >
@@ -431,7 +444,13 @@ export function Header({
 
           {isSearchOpen && activeSearchStep === "who" && (
             isServiceSearch ? (
-              <ServiceSelector />
+              <ServiceSelector
+                selected={serviceType}
+                onSelect={(key) => {
+                  onServiceChange(key);
+                  onSearchOpen(false);
+                }}
+              />
             ) : (
               <GuestSelector
                 counts={guestCounts}
@@ -834,13 +853,24 @@ function GuestSelector({
   );
 }
 
-function ServiceSelector() {
+function ServiceSelector({
+  selected,
+  onSelect,
+}: {
+  selected: string | null;
+  onSelect: (key: string | null) => void;
+}) {
   const { t } = useLanguage();
 
   return (
     <div className="service-selector" role="dialog" aria-label={t.search.serviceType}>
       {t.search.serviceOptions.map((option) => (
-        <button className="service-option" key={option.label} type="button">
+        <button
+          className={`service-option${selected === option.key ? " is-active" : ""}`}
+          key={option.key}
+          type="button"
+          onClick={() => onSelect(selected === option.key ? null : option.key)}
+        >
           <i className={`bi ${option.icon}`} aria-hidden="true" />
           <span>{option.label}</span>
         </button>

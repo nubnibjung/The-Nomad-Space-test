@@ -282,9 +282,9 @@ export default function ListingDetailPage() {
 
         <section className="detail-reviews" id="reviews">
           <div className="detail-rating-hero">
-            <Icon name="laurel" />
+            <Icon name="star" />
             <strong>{listing.rating.toFixed(1)}</strong>
-            <Icon name="laurel" />
+            <Icon name="star" />
           </div>
           <h2>{t.detail.ratingTitle}</h2>
           <p>{t.detail.ratingCopy}</p>
@@ -685,6 +685,7 @@ type IconName =
   | "shield"
   | "spark"
   | "spray"
+  | "star"
   | "tag"
   | "utensils"
   | "waves"
@@ -720,6 +721,7 @@ function Icon({ name }: { name: IconName }) {
     shield: <><path d="M12 3 19 6v5c0 4.5-2.4 7.5-7 10-4.6-2.5-7-5.5-7-10V6l7-3Z" /></>,
     spark: <><path d="M12 3v18M3 12h18M5.5 5.5l13 13M18.5 5.5l-13 13" /></>,
     spray: <><path d="M10 4h5v4h-5zM12.5 8v3M9 11h7v9H9zM16 5h3" /></>,
+    star: <><path fill="currentColor" stroke="none" d="M12 17.3l-6.18 3.7 1.64-7.03L2 9.24l7.19-.61L12 2l2.81 6.63 7.19.61-5.46 4.73 1.64 7.03z" /></>,
     tag: <><path d="M4 11V5h6l9 9-6 6-9-9Z" /><circle cx="8" cy="8" r="1" /></>,
     utensils: <><path d="M7 4v8M5 4v8M9 4v8M5 12h4v8M16 4v16M14 4c0 4 4 4 4 8" /></>,
     waves: <><path d="M4 13c1.5 0 2-.8 3.5-.8S9.5 13 11 13s2-.8 3.5-.8S16.5 13 18 13s2-.8 3-.8M4 17c1.5 0 2-.8 3.5-.8S9.5 17 11 17s2-.8 3.5-.8S16.5 17 18 17s2-.8 3-.8" /></>,

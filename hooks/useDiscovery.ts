@@ -184,7 +184,7 @@ export function useDiscovery() {
     setAutoSearch(false);
     setIsSearchOpen(false);
     setIsFilterOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0 });
   }
   function handleDateChange(date: Date | null) { setSelectedDate(date); }
   function handleGuestChange(type: GuestType, delta: 1 | -1) {

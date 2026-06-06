@@ -562,7 +562,7 @@ input:focus-visible {
   justify-content: center;
   gap: 2px;
   border: 0;
-  border-right: 1px solid var(--soft-border);
+  /* border-right: 1px solid var(--soft-border); */
   background: transparent;
   padding: 14px 32px;
   text-align: left;
@@ -1407,12 +1407,13 @@ input:focus-visible {
 }
 
 .map-show-button {
-  position: sticky;
-  top: 100px;
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 8;
   width: fit-content;
   height: 42px;
-  margin: 0 0 22px auto;
   padding: 0 16px;
 }
 
@@ -2225,6 +2226,16 @@ input:focus-visible {
   border-color: #b0b0b0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   transform: translateY(-1px);
+}
+
+.service-option.is-active {
+  border-color: #222222;
+  background: #222222;
+  color: #ffffff;
+}
+
+.service-option.is-active .bi {
+  color: #ffffff;
 }
 
 .service-option .bi {
@@ -3401,7 +3412,7 @@ input:focus-visible {
   border-radius: 3px;
   background: #222222;
   pointer-events: none;
-  transition: left 240ms cubic-bezier(0.4, 0, 0.2, 1), width 240ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: left 150ms cubic-bezier(0.4, 0, 0.2, 1), width 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nomad-tab-icon {
@@ -4087,8 +4098,8 @@ input:focus-visible {
 .top-header.is-experience-search:not(.is-scrolled) .search-morph,
 .top-header.is-experience-search:not(.is-scrolled) .search-morph.is-open {
   top: 129px;
-  width: min(1064px, calc(100vw - 800px));
-  min-width: 920px;
+  width: min(850px, calc(100vw - 80px));
+  min-width: 720px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .search-pill,
@@ -4200,14 +4211,28 @@ input:focus-visible {
   right: 0;
 }
 
-.top-header.is-scrolled.is-search-active {
-  min-height: 252px;
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) {
+  min-height: 196px !important;
+  border-bottom-color: #dddddd !important;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08) !important;
 }
 
-.top-header.is-scrolled.is-search-active .header-inner {
-  height: 120px;
-  min-height: 120px;
-  padding: 8px 38px 0;
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .header-inner {
+  height: 84px !important;
+  min-height: 84px !important;
+  padding: 0 38px !important;
+}
+
+.top-header.is-scrolled.is-search-active.is-experience-search {
+  min-height: 252px !important;
+  border-bottom-color: #dddddd !important;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.top-header.is-scrolled.is-search-active.is-experience-search .header-inner {
+  height: 120px !important;
+  min-height: 120px !important;
+  padding: 0 38px !important;
 }
 
 .top-header.is-scrolled.is-search-active .nomad-tabs {
@@ -4216,34 +4241,73 @@ input:focus-visible {
   transform: none;
 }
 
-.top-header.is-scrolled.is-search-active .search-morph,
-.top-header.is-scrolled.is-search-active .search-morph.is-open {
-  top: 129px;
-  width: min(1064px, calc(100vw - 800px));
-  min-width: 920px;
-  transform: translateX(-50%) scale(1);
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-morph,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-morph.is-open {
+  top: 88px !important;
+  width: min(890px, calc(100vw - 460px)) !important;
+  min-width: 0 !important;
+  transform: translateX(-50%) scale(1) !important;
 }
 
-.top-header.is-scrolled.is-search-active .search-pill,
-.top-header.is-scrolled.is-search-active .search-morph.is-open .search-pill {
-  grid-template-columns: 1.12fr 1.12fr 1fr auto;
-  min-height: 74px;
-  background: #ebebeb;
-  box-shadow: none;
+.top-header.is-scrolled.is-search-active.is-experience-search .search-morph,
+.top-header.is-scrolled.is-search-active.is-experience-search .search-morph.is-open {
+  top: 129px !important;
+  width: min(850px, calc(100vw - 80px)) !important;
+  min-width: 720px !important;
+  transform: translateX(-50%) scale(1) !important;
 }
 
-.top-header.is-scrolled.is-search-active .search-field,
-.top-header.is-scrolled.is-search-active .search-field:first-child {
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0 38px;
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-pill,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-morph.is-open .search-pill {
+  grid-template-columns: 1.1fr 1.1fr 0.9fr auto !important;
+  min-height: 74px !important;
+}
+
+.top-header.is-scrolled.is-search-active.is-experience-search .search-pill,
+.top-header.is-scrolled.is-search-active.is-experience-search .search-morph.is-open .search-pill {
+  grid-template-columns: 1.12fr 1.12fr 1fr auto !important;
+  min-height: 74px !important;
+}
+
+/* Active search pill styles (scrolled & top of page) */
+.search-morph.is-open .search-pill,
+.top-header.is-scrolled.is-search-active .search-pill {
+  background: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+  padding-block: 6px !important;
+}
+
+/* Enhanced active field highlight capsule shadow */
+.search-field-highlight {
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 30px, rgba(0, 0, 0, 0.08) 0px 1px 8px !important;
+}
+
+.top-header.is-scrolled.is-search-active.is-experience-search .search-button {
+  background: #111111 !important;
+}
+
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-field,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-field:first-child {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: 0 31px !important;
+}
+
+.top-header.is-scrolled.is-search-active.is-experience-search .search-field,
+.top-header.is-scrolled.is-search-active.is-experience-search .search-field:first-child {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: 0 38px !important;
 }
 
 .top-header.is-scrolled.is-search-active .search-field.is-active {
   border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.16);
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .top-header.is-scrolled.is-search-active .search-field:nth-of-type(3).is-active {
@@ -4517,8 +4581,8 @@ input:focus-visible {
   border-bottom-right-radius: 0;
 }
 
-.search-morph.is-open .search-field.is-active + .search-field:hover:not(.is-active)::after,
-.top-header.is-scrolled.is-search-active .search-field.is-active + .search-field:hover:not(.is-active)::after {
+.search-morph.is-open .search-field.is-active+.search-field:hover:not(.is-active)::after,
+.top-header.is-scrolled.is-search-active .search-field.is-active+.search-field:hover:not(.is-active)::after {
   inset: 0 0 0 -14px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -4606,27 +4670,56 @@ input:focus-visible {
   display: none;
 }
 
-.top-header.is-scrolled.is-search-active .search-button {
-  width: auto;
-  min-width: 118px;
-  height: 48px;
-  margin: 13px 16px;
-  border-radius: 999px;
-  background: #FF385C;
-  padding: 0 22px;
+.expanded-search-label {
+  display: none !important;
 }
 
-.top-header.is-scrolled.is-search-active .search-button-icon {
-  width: 18px;
-  height: 18px;
+.top-header:not(.is-experience-search) .search-morph.is-open .search-button,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-button {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin: 7px 14px !important;
+  border-radius: 50% !important;
+  background: #FF385C !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
 }
 
-.top-header.is-scrolled.is-search-active .expanded-search-label {
-  display: inline-flex;
+.top-header:not(.is-experience-search) .search-morph.is-open .search-button-icon,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search) .search-button-icon {
+  width: 16px !important;
+  height: 16px !important;
 }
 
-.top-header.is-search-active+.scrim {
-  inset: 252px 0 0;
+.top-header.is-experience-search .search-morph.is-open .search-button,
+.top-header.is-scrolled.is-search-active.is-experience-search .search-button {
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  margin: 13px 16px !important;
+  border-radius: 50% !important;
+  background: #111111 !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+}
+
+.top-header.is-experience-search .search-morph.is-open .search-button-icon,
+.top-header.is-scrolled.is-search-active.is-experience-search .search-button-icon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.top-header.is-search-active:not(.is-experience-search)+.scrim,
+.top-header.is-scrolled.is-search-active:not(.is-experience-search)+.scrim {
+  inset: 196px 0 0 !important;
+}
+
+.top-header.is-search-active.is-experience-search+.scrim,
+.top-header.is-scrolled.is-search-active.is-experience-search+.scrim {
+  inset: 252px 0 0 !important;
 }
 
 .nomad-layout {
@@ -6970,6 +7063,7 @@ input:focus-visible {
     transform: translateY(50px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -7448,16 +7542,16 @@ input:focus-visible {
 
 /* Hide divider lines on active or hovered states */
 .search-morph.is-open .search-field.is-active::before,
-.search-morph.is-open .search-field.is-active + .search-field::before,
+.search-morph.is-open .search-field.is-active+.search-field::before,
 .top-header.is-search-active .search-field.is-active::before,
-.top-header.is-search-active .search-field.is-active + .search-field::before {
+.top-header.is-search-active .search-field.is-active+.search-field::before {
   opacity: 0 !important;
 }
 
 .search-morph.is-open .search-field:hover::before,
-.search-morph.is-open .search-field:hover + .search-field::before,
+.search-morph.is-open .search-field:hover+.search-field::before,
 .top-header.is-search-active .search-field:hover::before,
-.top-header.is-search-active .search-field:hover + .search-field::before {
+.top-header.is-search-active .search-field:hover+.search-field::before {
   opacity: 0 !important;
 }
 
@@ -7527,16 +7621,14 @@ input:focus-visible {
 
 .search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: 0 -120px 0 -22px !important;
+  inset: 0 -76px 0 -22px !important;
   border-radius: 999px !important;
 }
-
-/* ─── Premium Airbnb-style hover transitions for adjacent active/hover states ─── */
 
 /* 1. Field 1 is Hovered, Field 2 is Active: Right side of Field 1 is flat and extends under Field 2 */
 .search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after {
-  inset: 0 -36px 0 -20px !important;
+  inset: 0 -30px 0 -20px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-top-left-radius: 999px !important;
@@ -7544,9 +7636,9 @@ input:focus-visible {
 }
 
 /* 2. Field 2 is Hovered, Field 1 is Active: Left side of Field 2 is flat and extends under Field 1 */
-.search-morph.is-open .search-field:nth-of-type(1).is-active + .search-field:nth-of-type(2):hover:not(.is-active)::after,
-.top-header.is-search-active .search-field:nth-of-type(1).is-active + .search-field:nth-of-type(2):hover:not(.is-active)::after {
-  inset: 0 -22px 0 -36px !important;
+.search-morph.is-open .search-field:nth-of-type(1).is-active+.search-field:nth-of-type(2):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(1).is-active+.search-field:nth-of-type(2):hover:not(.is-active)::after {
+  inset: 0 -22px 0 -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7556,7 +7648,7 @@ input:focus-visible {
 /* 3. Field 2 is Hovered, Field 3 is Active: Right side of Field 2 is flat and extends under Field 3 */
 .search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after {
-  inset: 0 -36px 0 -22px !important;
+  inset: 0 -30px 0 -22px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-top-left-radius: 999px !important;
@@ -7564,9 +7656,9 @@ input:focus-visible {
 }
 
 /* 4. Field 3 is Hovered, Field 2 is Active: Left side of Field 3 is flat and extends under Field 2 */
-.search-morph.is-open .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after,
-.top-header.is-search-active .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: 0 -120px 0 -36px !important;
+.search-morph.is-open .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after {
+  inset: 0 -76px 0 -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7576,7 +7668,7 @@ input:focus-visible {
 /* Search Button Hover Integration: Highlight third field too! */
 .search-pill:has(.search-button:hover) .search-field:nth-of-type(3):not(.is-active)::after {
   position: absolute !important;
-  inset: 0 -120px 0 -22px !important;
+  inset: 0 -76px 0 -22px !important;
   z-index: -1 !important;
   border-radius: 999px !important;
   background: var(--search-field-hover) !important;
@@ -7585,8 +7677,8 @@ input:focus-visible {
 }
 
 /* Search Button Hover Integration: If Field 2 is active, the left side of Field 3 is flat and extends under Field 2 */
-.search-pill:has(.search-button:hover) .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):not(.is-active)::after {
-  inset: 0 -120px 0 -36px !important;
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):not(.is-active)::after {
+  inset: 0 -76px 0 -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7598,21 +7690,21 @@ input:focus-visible {
 }
 
 /* ─── Scrolled Compact Header Size & Placement adjustments ────── */
-.top-header.is-scrolled {
+.top-header.is-scrolled:not(.is-search-active) {
   min-height: 80px !important;
 }
 
-.top-header.is-scrolled .header-inner {
+.top-header.is-scrolled:not(.is-search-active) .header-inner {
   height: 80px !important;
   min-height: 80px !important;
 }
 
-.top-header.is-scrolled .search-morph,
-.top-header.is-scrolled .search-morph.is-open {
+.top-header.is-scrolled:not(.is-search-active) .search-morph,
+.top-header.is-scrolled:not(.is-search-active) .search-morph.is-open {
   top: 16px !important;
 }
 
-.top-header.is-scrolled ~ .category-bar {
+.top-header.is-scrolled:not(.is-search-active)~.category-bar {
   top: 80px !important;
 }
 
@@ -7621,7 +7713,8 @@ input:focus-visible {
 .top-header.is-scrolled:not(.is-search-active) .search-morph,
 .top-header.is-scrolled:not(.is-search-active) .search-morph.is-open {
   min-width: 0 !important;
-  width: 340px !important; /* Match Airbnb compact collapsed size */
+  width: 340px !important;
+  /* Match Airbnb compact collapsed size */
 }
 
 /* Adjust height and grid columns inside collapsed scrolled pill */
@@ -7647,7 +7740,8 @@ input:focus-visible {
 .top-header.is-scrolled .compact-field-labeled strong {
   color: #222222 !important;
   font-size: 14px !important;
-  font-weight: 500 !important; /* Regular/Medium weight like Airbnb */
+  font-weight: 500 !important;
+  /* Regular/Medium weight like Airbnb */
 }
 
 .top-header.is-scrolled .search-field {
@@ -7677,4 +7771,9 @@ input:focus-visible {
 .brand-mark {
   color: #FF385C !important;
 }
-
+
+/* Hide bottom border line and shadow when search bar is open */
+.top-header.is-search-active {
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
