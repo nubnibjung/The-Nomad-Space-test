@@ -4313,7 +4313,7 @@ input:focus-visible {
   border: 1px solid #e0e0e0 !important;
   border-radius: 999px !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
-  padding-block: 6px !important;
+  /* padding-block: 6px !important; */
 }
 
 /* Enhanced active field highlight capsule shadow */
@@ -4722,6 +4722,7 @@ input:focus-visible {
   padding: 0 !important;
   display: grid !important;
   place-items: center !important;
+  z-index: 1;
 }
 
 .top-header:not(.is-experience-search) .search-morph.is-open .search-button-icon,
