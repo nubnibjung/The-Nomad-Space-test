@@ -580,6 +580,17 @@ input:focus-visible {
   border-right-color: transparent;
 }
 
+/* ตอนไม่กดคลิก: hover ฟิลด์สุดท้าย ("ใคร") ให้พื้นหลังยืดไปสุดถึงปุ่ม search
+   (ยืดใต้ปุ่มแล้วยกปุ่มขึ้นบนให้เห็นเต็ม) */
+.search-morph:not(.is-open) .search-field:has(+ .search-button):hover {
+  margin-right: -92px;
+}
+
+.search-morph:not(.is-open) .search-field:has(+ .search-button):hover + .search-button {
+  position: relative;
+  z-index: 2;
+}
+
 
 .search-field span {
   color: var(--foreground);
@@ -2684,7 +2695,7 @@ input:focus-visible {
 
 .top-header.is-experience-search .search-pill,
 .top-header.is-experience-search .search-morph.is-open .search-pill {
-  background: #ebebeb;
+  background: #fff;
 }
 
 .top-header.is-experience-search .search-field-highlight {
@@ -4064,7 +4075,7 @@ input:focus-visible {
   height: 48px;
   margin: 7px 14px;
   border-radius: 999px;
-  background: #FF385C;
+  
   color: #ffffff;
   padding: 0 18px;
 }
@@ -4085,7 +4096,7 @@ input:focus-visible {
 }
 
 .discovery-shell.is-experience {
-  padding-top: 252px;
+  padding-top: 196px;
 }
 
 .discovery-shell.is-search-expanded {
@@ -4102,55 +4113,55 @@ input:focus-visible {
 }
 
 .top-header.is-experience-search:not(.is-scrolled) {
-  min-height: 252px;
+  min-height: 196px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .header-inner {
-  height: 120px;
-  min-height: 120px;
+  height: 84px;
+  min-height: 84px;
   padding: 0 38px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .nomad-tabs {
-  gap: 36px;
+  gap: 14px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .nomad-tab {
-  grid-template-columns: 48px auto;
-  min-width: 124px;
-  padding: 14px 0 13px;
-  font-size: 16px;
-  line-height: 20px;
+  grid-template-columns: 44px auto;
+  min-width: 96px;
+  padding: 10px 10px 12px;
+  font-size: 14px;
+  line-height: 18px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .nomad-tab-icon {
-  font-size: 40px;
+  font-size: 33px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .nomad-tab small {
   top: 4px;
-  left: 40px;
+  left: 30px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .search-morph,
 .top-header.is-experience-search:not(.is-scrolled) .search-morph.is-open {
-  top: 129px;
-  width: min(850px, calc(100vw - 80px));
-  min-width: 720px;
+  top: 88px;
+  width: min(890px, calc(100vw - 460px));
+  min-width: 0;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .search-pill,
 .top-header.is-experience-search:not(.is-scrolled) .search-morph.is-open .search-pill {
-  grid-template-columns: 1.12fr 1.12fr 1fr auto;
+  grid-template-columns: 1.1fr 1.1fr 0.9fr auto;
   min-height: 74px;
   padding-block: 0;
   border-color: #dddddd;
-  background: #ebebeb;
+  background: #ffffff;
   box-shadow: none;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .search-field {
-  padding: 0 38px;
+  padding: 0 31px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .search-field.is-active {
@@ -4261,14 +4272,14 @@ input:focus-visible {
 }
 
 .top-header.is-scrolled.is-search-active.is-experience-search {
-  min-height: 252px !important;
+  min-height: 196px !important;
   border-bottom-color: #dddddd !important;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.08) !important;
 }
 
 .top-header.is-scrolled.is-search-active.is-experience-search .header-inner {
-  height: 120px !important;
-  min-height: 120px !important;
+  height: 84px !important;
+  min-height: 84px !important;
   padding: 0 38px !important;
 }
 
@@ -4288,9 +4299,9 @@ input:focus-visible {
 
 .top-header.is-scrolled.is-search-active.is-experience-search .search-morph,
 .top-header.is-scrolled.is-search-active.is-experience-search .search-morph.is-open {
-  top: 129px !important;
-  width: min(850px, calc(100vw - 80px)) !important;
-  min-width: 720px !important;
+  top: 88px !important;
+  width: min(890px, calc(100vw - 460px)) !important;
+  min-width: 0 !important;
   transform: translateX(-50%) scale(1) !important;
 }
 
@@ -4302,7 +4313,7 @@ input:focus-visible {
 
 .top-header.is-scrolled.is-search-active.is-experience-search .search-pill,
 .top-header.is-scrolled.is-search-active.is-experience-search .search-morph.is-open .search-pill {
-  grid-template-columns: 1.12fr 1.12fr 1fr auto !important;
+  grid-template-columns: 1.1fr 1.1fr 0.9fr auto !important;
   min-height: 74px !important;
 }
 
@@ -4338,7 +4349,7 @@ input:focus-visible {
   flex-direction: column !important;
   align-items: flex-start !important;
   justify-content: center !important;
-  padding: 0 38px !important;
+  padding: 0 31px !important;
 }
 
 .top-header.is-scrolled.is-search-active .search-field.is-active {
@@ -4718,7 +4729,7 @@ input:focus-visible {
   height: 48px !important;
   margin: 7px 14px !important;
   border-radius: 50% !important;
-  background: #FF385C !important;
+  background: #111 !important;
   padding: 0 !important;
   display: grid !important;
   place-items: center !important;
@@ -4757,7 +4768,7 @@ input:focus-visible {
 
 .top-header.is-search-active.is-experience-search+.scrim,
 .top-header.is-scrolled.is-search-active.is-experience-search+.scrim {
-  inset: 252px 0 0 !important;
+  inset: 196px 0 0 !important;
 }
 
 .nomad-layout {
@@ -7659,7 +7670,7 @@ input:focus-visible {
 
 .search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: -12px -76px -12px -22px !important;
+  inset: -12px -128px -12px -22px !important;
   border-radius: 999px !important;
 }
 
@@ -7696,7 +7707,7 @@ input:focus-visible {
 /* 4. Field 3 is Hovered, Field 2 is Active: Left side of Field 3 is flat and extends under Field 2 */
 .search-morph.is-open .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: -12px -76px -12px -30px !important;
+  inset: -12px -128px -12px -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7706,7 +7717,7 @@ input:focus-visible {
 /* Search Button Hover Integration: Highlight third field too! */
 .search-pill:has(.search-button:hover) .search-field:nth-of-type(3):not(.is-active)::after {
   position: absolute !important;
-  inset: 0 -76px 0 -22px !important;
+  inset: 0 -128px 0 -22px !important;
   z-index: -1 !important;
   border-radius: 999px !important;
   background: var(--search-field-hover) !important;
@@ -7716,7 +7727,7 @@ input:focus-visible {
 
 /* Search Button Hover Integration: If Field 2 is active, the left side of Field 3 is flat and extends under Field 2 */
 .search-pill:has(.search-button:hover) .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):not(.is-active)::after {
-  inset: 0 -76px 0 -30px !important;
+  inset: 0 -128px 0 -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7800,7 +7811,6 @@ input:focus-visible {
 
 /* Style the brand logo and text with Airbnb Red for a cohesive clone look */
 .brand {
-  color: #FF385C !important;
   font-size: 20px !important;
   font-weight: 800 !important;
   letter-spacing: -0.5px !important;
@@ -7817,4 +7827,98 @@ input:focus-visible {
 }
 .search-field-highlight {
   transition: none !important;
+}
+
+/* ─── FIX: last search field hover must reach the search icon ───────────── */
+/* The third field ("ใคร") needs its hover area to extend under the search
+   button until the right edge of the whole pill. This fixes the grey hover
+   stopping halfway behind the search icon. */
+
+/* Keep the pill clipping the hover to the outer rounded border. */
+.search-pill {
+  overflow: hidden;
+}
+
+/* Resting / closed search bar: stretch the last field hover under the icon. */
+.search-morph:not(.is-open) .search-field:has(+ .search-button):hover {
+  position: relative;
+  z-index: 1;
+  margin-right: -92px;
+  padding-right: 128px;
+  border-radius: 999px;
+  background: var(--search-field-hover);
+  box-shadow: none;
+}
+
+/* Open search bar and scrolled active search bar: use ::after so the hover
+   background can go under the button without moving layout. */
+.search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active),
+.top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active),
+.top-header.is-scrolled.is-search-active .search-field:nth-of-type(3):hover:not(.is-active) {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-scrolled.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
+  content: "" !important;
+  position: absolute !important;
+  top: -12px !important;
+  bottom: -12px !important;
+  left: -22px !important;
+  right: -128px !important;
+  z-index: -1 !important;
+  border-radius: 999px !important;
+  background: var(--search-field-hover) !important;
+  pointer-events: none !important;
+}
+
+/* If the middle field is active, keep the left side flat but still extend to
+   the right edge behind the search icon. */
+.search-morph.is-open .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-scrolled.is-search-active .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after {
+  left: -30px !important;
+  right: -128px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
+
+/* Hovering the search button should also light up the last field all the way
+   to the right edge. */
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(3):not(.is-active)::after {
+  content: "" !important;
+  position: absolute !important;
+  top: -12px !important;
+  bottom: -12px !important;
+  left: -22px !important;
+  right: -128px !important;
+  z-index: -1 !important;
+  border-radius: 999px !important;
+  background: var(--search-field-hover) !important;
+  pointer-events: none !important;
+}
+
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):not(.is-active)::after {
+  left: -30px !important;
+  right: -128px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
+
+/* Search button must always stay above the grey hover background. */
+.search-button,
+.search-morph:not(.is-open) .search-field:has(+ .search-button):hover + .search-button,
+.search-morph.is-open .search-button,
+.top-header.is-search-active .search-button,
+.top-header.is-scrolled.is-search-active .search-button {
+  position: relative;
+  z-index: 5 !important;
 }

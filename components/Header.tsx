@@ -36,9 +36,24 @@ type Props = {
 };
 
 export function Header({
-  query, activeCategory, dateRange, dateFlexIndex, guestCounts, isSearchOpen, isScrolled,
-  onQueryChange, onCategoryChange, onDateChange, onDateFlexChange, onGuestChange, onGuestReset, onSearchOpen, onSearchReset, onNearby,
-  serviceType, onServiceChange,
+  query,
+  activeCategory,
+  dateRange,
+  dateFlexIndex,
+  guestCounts,
+  isSearchOpen,
+  isScrolled,
+  onQueryChange,
+  onCategoryChange,
+  onDateChange,
+  onDateFlexChange,
+  onGuestChange,
+  onGuestReset,
+  onSearchOpen,
+  onSearchReset,
+  onNearby,
+  serviceType,
+  onServiceChange,
 }: Props) {
   const { data: session, status } = useSession();
   const { t } = useLanguage();
@@ -49,78 +64,92 @@ export function Header({
   const [calendarOffset, setCalendarOffset] = useState(0);
   const [selectedStayLengthIndex, setSelectedStayLengthIndex] = useState(0);
   const [flexibleMonthOffset, setFlexibleMonthOffset] = useState(0);
-  const [selectedFlexibleMonth, setSelectedFlexibleMonth] = useState(CALENDAR_START_DATE);
+  const [selectedFlexibleMonth, setSelectedFlexibleMonth] =
+    useState(CALENDAR_START_DATE);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const authMenuRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const pillRef = useRef<HTMLDivElement | null>(null);
-  const [underlineStyle, setUnderlineStyle] = useState<{ left: number; width: number; bottom: number } | null>(null);
-  const [highlightStyle, setHighlightStyle] = useState<{ left: number; width: number } | null>(null);
+  const [underlineStyle, setUnderlineStyle] = useState<{
+    left: number;
+    width: number;
+    bottom: number;
+  } | null>(null);
+  const [highlightStyle, setHighlightStyle] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
 
   useLayoutEffect(() => {
     const container = tabsRef.current;
     if (!container) return;
-    const activeBtn = container.querySelector<HTMLButtonElement>(".nomad-tab.is-active");
+    const activeBtn = container.querySelector<HTMLButtonElement>(
+      ".nomad-tab.is-active",
+    );
     if (!activeBtn) return;
     setUnderlineStyle({
       left: activeBtn.offsetLeft,
       width: activeBtn.offsetWidth,
-      bottom: container.offsetHeight - activeBtn.offsetTop - activeBtn.offsetHeight,
+      bottom:
+        container.offsetHeight - activeBtn.offsetTop - activeBtn.offsetHeight,
     });
   }, [activeCategory]);
 
   useLayoutEffect(() => {
-  const pill = pillRef.current;
-  if (!pill) return;
+    const pill = pillRef.current;
+    if (!pill) return;
 
-  let resizeObserver: ResizeObserver | null = null;
+    let resizeObserver: ResizeObserver | null = null;
 
-  function measureActiveField() {
-    const pillEl = pillRef.current;
-    if (!pillEl) return;
+    function measureActiveField() {
+      const pillEl = pillRef.current;
+      if (!pillEl) return;
 
-    const activeFieldEl = pillEl.querySelector<HTMLElement>(".search-field.is-active");
+      const activeFieldEl = pillEl.querySelector<HTMLElement>(
+        ".search-field.is-active",
+      );
 
-    if (!activeFieldEl) {
-      setHighlightStyle(null);
-      return;
+      if (!activeFieldEl) {
+        setHighlightStyle(null);
+        return;
+      }
+
+      const pillRect = pillEl.getBoundingClientRect();
+      const activeRect = activeFieldEl.getBoundingClientRect();
+      const left = activeRect.left - pillRect.left;
+      const width =
+        activeSearchStep === "who" ? pillRect.width - left : activeRect.width;
+
+      setHighlightStyle({ left, width });
     }
 
-    const pillRect = pillEl.getBoundingClientRect();
-    const activeRect = activeFieldEl.getBoundingClientRect();
-    const left = activeRect.left - pillRect.left;
-    const width = activeSearchStep === "who" ? pillRect.width - left : activeRect.width;
+    measureActiveField();
 
-    setHighlightStyle({ left, width });
-  }
+    const fields = pill.querySelectorAll(".search-field");
+    const searchButton = pill.querySelector(".search-button");
 
-  measureActiveField();
+    if (typeof window !== "undefined" && "ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(() => {
+        measureActiveField();
+      });
 
-  const fields = pill.querySelectorAll(".search-field");
-  const searchButton = pill.querySelector(".search-button");
+      fields.forEach((field) => resizeObserver?.observe(field));
 
-  if (typeof window !== "undefined" && "ResizeObserver" in window) {
-    resizeObserver = new ResizeObserver(() => {
-      measureActiveField();
-    });
-
-    fields.forEach((field) => resizeObserver?.observe(field));
-
-    if (searchButton) {
-      resizeObserver.observe(searchButton);
+      if (searchButton) {
+        resizeObserver.observe(searchButton);
+      }
     }
-  }
 
-  window.addEventListener("resize", measureActiveField);
+    window.addEventListener("resize", measureActiveField);
 
-  return () => {
-    window.removeEventListener("resize", measureActiveField);
+    return () => {
+      window.removeEventListener("resize", measureActiveField);
 
-    if (resizeObserver) {
-      resizeObserver.disconnect();
-    }
-  };
-}, [isSearchOpen, activeSearchStep, activeCategory, isScrolled]);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [isSearchOpen, activeSearchStep, activeCategory, isScrolled]);
 
   const isExperienceSearch = activeCategory === "loft";
   const isServiceSearch = activeCategory === "coffee";
@@ -128,22 +157,41 @@ export function Header({
   const tabs = [
     { id: "all", label: t.nav.tabs.all, icon: "🏠" },
     { id: "loft", label: t.nav.tabs.loft, icon: "🎈", badge: t.nav.tabs.new },
-    { id: "coffee", label: t.nav.tabs.coffee, icon: "🛎️", badge: t.nav.tabs.new },
+    {
+      id: "coffee",
+      label: t.nav.tabs.coffee,
+      icon: "🛎️",
+      badge: t.nav.tabs.new,
+    },
   ];
-  const userInitial = getUserInitial(session?.user?.name ?? session?.user?.email);
+  const userInitial = getUserInitial(
+    session?.user?.name ?? session?.user?.email,
+  );
   const guestSearchCount = getGuestSearchCount(guestCounts);
   const hasCustomGuestCount = guestSearchCount > 0 || guestCounts.pets > 0;
-  const guestSummary = hasCustomGuestCount ? `${guestSearchCount} ${t.search.guests}` : t.search.addGuests;
+  const guestSummary = hasCustomGuestCount
+    ? `${guestSearchCount} ${t.search.guests}`
+    : t.search.addGuests;
   const flexDays = DATE_FLEX_DAYS[dateFlexIndex];
   const rangeSummary = formatSearchRange(dateRange, t.datePicker.shortMonths);
-  const rangeWithFlex = rangeSummary && flexDays > 0 ? `${rangeSummary} ±${flexDays}` : rangeSummary;
+  const rangeWithFlex =
+    rangeSummary && flexDays > 0
+      ? `${rangeSummary} ±${flexDays}`
+      : rangeSummary;
   const flexibleSummary = `${t.datePicker.stayLengths[selectedStayLengthIndex]} ${t.datePicker.flexibleConnector} ${t.datePicker.months[selectedFlexibleMonth.getMonth()]}`;
-  const whenSummary = datePickerMode === "flexible" ? flexibleSummary : rangeWithFlex;
+  const whenSummary =
+    datePickerMode === "flexible" ? flexibleSummary : rangeWithFlex;
   const dateSummary = whenSummary ?? t.search.addDates;
   const compactDateSummary = whenSummary ?? t.search.anytime;
-  const rightSearchLabel = isServiceSearch ? t.search.serviceType : t.search.who;
-  const selectedServiceLabel = t.search.serviceOptions.find((option) => option.key === serviceType)?.label;
-  const rightSearchSummary = isServiceSearch ? (selectedServiceLabel ?? t.search.addService) : guestSummary;
+  const rightSearchLabel = isServiceSearch
+    ? t.search.serviceType
+    : t.search.who;
+  const selectedServiceLabel = t.search.serviceOptions.find(
+    (option) => option.key === serviceType,
+  )?.label;
+  const rightSearchSummary = isServiceSearch
+    ? (selectedServiceLabel ?? t.search.addService)
+    : guestSummary;
   const activeField = isSearchOpen ? activeSearchStep : null;
 
   function openSearchStep(step: SearchStep) {
@@ -199,13 +247,15 @@ export function Header({
 
     function handleOutsidePointerDown(event: PointerEvent) {
       const searchElement = searchRef.current;
-      if (!searchElement || searchElement.contains(event.target as Node)) return;
+      if (!searchElement || searchElement.contains(event.target as Node))
+        return;
 
       onSearchOpen(false);
     }
 
     document.addEventListener("pointerdown", handleOutsidePointerDown);
-    return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsidePointerDown);
   }, [isSearchOpen, onSearchOpen]);
 
   useEffect(() => {
@@ -213,21 +263,29 @@ export function Header({
 
     function handleOutsidePointerDown(event: PointerEvent) {
       const authMenuElement = authMenuRef.current;
-      if (!authMenuElement || authMenuElement.contains(event.target as Node)) return;
+      if (!authMenuElement || authMenuElement.contains(event.target as Node))
+        return;
 
       setMenuOpen(false);
     }
 
     document.addEventListener("pointerdown", handleOutsidePointerDown);
-    return () => document.removeEventListener("pointerdown", handleOutsidePointerDown);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsidePointerDown);
   }, [menuOpen]);
 
   return (
     <>
-      <header className={`top-header${isScrolled ? " is-scrolled" : ""}${isSearchOpen ? " is-search-active" : ""}${isExperienceSearch ? " is-experience-search" : ""}`}>
+      <header
+        className={`top-header${isScrolled ? " is-scrolled" : ""}${isSearchOpen ? " is-search-active" : ""}${isExperienceSearch ? " is-experience-search" : ""}`}
+      >
         <nav className="header-inner" aria-label="Primary">
           <Link className="brand" href="/" aria-label="The Nomad Space home">
-            <span className="brand-mark" aria-hidden="true">
+            <span
+              className="brand-mark"
+              aria-hidden="true"
+              style={{ color: "#000000" }}
+            >
               <svg viewBox="0 0 32 32">
                 <path d="M5 25.5V11.2L16 4l11 7.2v14.3h-5.8V14.7L16 11.3l-5.2 3.4v10.8H5Z" />
                 <path d="M13.1 25.5V17h5.8v8.5h-5.8Z" />
@@ -236,11 +294,20 @@ export function Header({
             <span>The Nomad Space</span>
           </Link>
 
-          <div className="nomad-tabs" role="tablist" aria-label={t.nav.tabsLabel} ref={tabsRef}>
+          <div
+            className="nomad-tabs"
+            role="tablist"
+            aria-label={t.nav.tabsLabel}
+            ref={tabsRef}
+          >
             {underlineStyle && (
               <span
                 className="nomad-tab-underline"
-                style={{ left: underlineStyle.left, width: underlineStyle.width, bottom: underlineStyle.bottom }}
+                style={{
+                  left: underlineStyle.left,
+                  width: underlineStyle.width,
+                  bottom: underlineStyle.bottom,
+                }}
                 aria-hidden
               />
             )}
@@ -266,7 +333,11 @@ export function Header({
             </Link>
 
             {session ? (
-              <Link className="account-avatar-button" href="/profile" aria-label={t.nav.profile}>
+              <Link
+                className="account-avatar-button"
+                href="/profile"
+                aria-label={t.nav.profile}
+              >
                 {session.user?.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -326,12 +397,18 @@ export function Header({
           </div>
         </nav>
 
-        <div className={`search-morph${isSearchOpen ? " is-open" : ""}`} ref={searchRef}>
-         <div className="search-pill" role="search" ref={pillRef}>
+        <div
+          className={`search-morph${isSearchOpen ? " is-open" : ""}`}
+          ref={searchRef}
+        >
+          <div className="search-pill" role="search" ref={pillRef}>
             {isSearchOpen && highlightStyle && (
               <span
                 className="search-field-highlight"
-                style={{ left: highlightStyle.left, width: highlightStyle.width }}
+                style={{
+                  left: highlightStyle.left,
+                  width: highlightStyle.width,
+                }}
                 aria-hidden
               />
             )}
@@ -391,7 +468,12 @@ export function Header({
                   openDateSearch();
                 }
               }}
-              onKeyDown={(e) => e.key === "Enter" && (isSearchOpen && activeSearchStep === "when" ? onSearchOpen(false) : openDateSearch())}
+              onKeyDown={(e) =>
+                e.key === "Enter" &&
+                (isSearchOpen && activeSearchStep === "when"
+                  ? onSearchOpen(false)
+                  : openDateSearch())
+              }
             >
               <span className="expanded-field-label">{t.search.when}</span>
               <strong className="expanded-field-input">{dateSummary}</strong>
@@ -411,7 +493,9 @@ export function Header({
                 </button>
               )}
               <span className="compact-field-label compact-field-labeled">
-                <small>{t.detail.checkIn} / {t.detail.checkOut}</small>
+                <small>
+                  {t.detail.checkIn} / {t.detail.checkOut}
+                </small>
                 <strong>{compactDateSummary}</strong>
               </span>
             </div>
@@ -427,10 +511,17 @@ export function Header({
                   openSearchStep("who");
                 }
               }}
-              onKeyDown={(e) => e.key === "Enter" && (isSearchOpen && activeSearchStep === "who" ? onSearchOpen(false) : openSearchStep("who"))}
+              onKeyDown={(e) =>
+                e.key === "Enter" &&
+                (isSearchOpen && activeSearchStep === "who"
+                  ? onSearchOpen(false)
+                  : openSearchStep("who"))
+              }
             >
               <span className="expanded-field-label">{rightSearchLabel}</span>
-              <strong className="expanded-field-input">{rightSearchSummary}</strong>
+              <strong className="expanded-field-input">
+                {rightSearchSummary}
+              </strong>
               {activeField === "who" && (
                 <button
                   className="field-clear-button"
@@ -461,11 +552,14 @@ export function Header({
               aria-label={t.search.submit}
               onClick={() => onSearchOpen(false)}
             >
-              <i className="bi bi-search search-button-icon" aria-hidden="true" />
+              <i
+                className="bi bi-search search-button-icon"
+                aria-hidden="true"
+              />
               <span className="expanded-search-label">{t.search.submit}</span>
             </button>
           </div>
-              
+
           {isSearchOpen && activeSearchStep === "where" && (
             <div className="location-suggest-wrapper">
               <LocationSuggest
@@ -496,8 +590,9 @@ export function Header({
             />
           )}
 
-          {isSearchOpen && activeSearchStep === "who" && (
-            isServiceSearch ? (
+          {isSearchOpen &&
+            activeSearchStep === "who" &&
+            (isServiceSearch ? (
               <ServiceSelector
                 selected={serviceType}
                 onSelect={(key) => {
@@ -511,8 +606,7 @@ export function Header({
                 onChange={onGuestChange}
                 variant={isExperienceSearch ? "experience" : "default"}
               />
-            )
-          )}
+            ))}
         </div>
       </header>
 
@@ -535,18 +629,33 @@ function GuestMenu({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <Link className="auth-dropdown-item" href="/help" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/help"
+        role="menuitem"
+        onClick={onClose}
+      >
         <BootstrapIcon name="bi-question-circle" />
         {t.nav.helpCenter}
       </Link>
       <hr className="auth-dropdown-divider" />
       <HostMenuLink onClose={onClose} />
       <hr className="auth-dropdown-divider" />
-      <Link className="auth-dropdown-item" href="/co-hosts" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/co-hosts"
+        role="menuitem"
+        onClick={onClose}
+      >
         {t.nav.findCoHost}
       </Link>
       <hr className="auth-dropdown-divider" />
-      <Link className="auth-dropdown-item" href="/auth" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/auth"
+        role="menuitem"
+        onClick={onClose}
+      >
         {t.nav.loginRegister}
       </Link>
     </>
@@ -573,39 +682,80 @@ function UserMenu({
   return (
     <>
       {topItems.map((item) => (
-        <Link className="auth-dropdown-item" href={item.href} role="menuitem" key={item.href} onClick={onClose}>
+        <Link
+          className="auth-dropdown-item"
+          href={item.href}
+          role="menuitem"
+          key={item.href}
+          onClick={onClose}
+        >
           <BootstrapIcon name={item.icon} />
           {item.label}
         </Link>
       ))}
       <hr className="auth-dropdown-divider" />
-      <Link className="auth-dropdown-item" href="/notifications" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/notifications"
+        role="menuitem"
+        onClick={onClose}
+      >
         <BootstrapIcon name="bi-bell" />
         {t.nav.notifications}
       </Link>
-      <Link className="auth-dropdown-item" href="/account" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/account"
+        role="menuitem"
+        onClick={onClose}
+      >
         <BootstrapIcon name="bi-gear" />
         {t.nav.accountSettings}
       </Link>
-      <button className="auth-dropdown-item" type="button" role="menuitem" onClick={onLanguageOpen}>
+      <button
+        className="auth-dropdown-item"
+        type="button"
+        role="menuitem"
+        onClick={onLanguageOpen}
+      >
         <BootstrapIcon name="bi-globe2" />
         {t.nav.languageCurrency}
       </button>
-      <Link className="auth-dropdown-item" href="/help" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/help"
+        role="menuitem"
+        onClick={onClose}
+      >
         <BootstrapIcon name="bi-question-circle" />
         {t.nav.helpCenter}
       </Link>
       <hr className="auth-dropdown-divider" />
       <HostMenuLink onClose={onClose} />
       <hr className="auth-dropdown-divider" />
-      <Link className="auth-dropdown-item" href="/refer-host" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/refer-host"
+        role="menuitem"
+        onClick={onClose}
+      >
         {t.nav.referHost}
       </Link>
-      <Link className="auth-dropdown-item" href="/co-hosts" role="menuitem" onClick={onClose}>
+      <Link
+        className="auth-dropdown-item"
+        href="/co-hosts"
+        role="menuitem"
+        onClick={onClose}
+      >
         {t.nav.findCoHost}
       </Link>
       <hr className="auth-dropdown-divider" />
-      <button className="auth-dropdown-item" type="button" role="menuitem" onClick={onSignOut}>
+      <button
+        className="auth-dropdown-item"
+        type="button"
+        role="menuitem"
+        onClick={onSignOut}
+      >
         {t.nav.signOut}
       </button>
     </>
@@ -616,7 +766,12 @@ function HostMenuLink({ onClose }: { onClose: () => void }) {
   const { t } = useLanguage();
 
   return (
-    <Link className="auth-dropdown-host" href="/auth" role="menuitem" onClick={onClose}>
+    <Link
+      className="auth-dropdown-host"
+      href="/auth"
+      role="menuitem"
+      onClick={onClose}
+    >
       <span>
         <strong>{t.nav.hostStart}</strong>
         <small>{t.nav.hostSubtext}</small>
@@ -667,8 +822,16 @@ function DatePickerPanel({
   const firstMonth = addMonths(CALENDAR_START_DATE, monthOffset);
   const secondMonth = addMonths(CALENDAR_START_DATE, monthOffset + 1);
   return (
-    <div className="date-picker-panel" role="dialog" aria-label={t.datePicker.label}>
-      <div className="date-picker-tabs" role="tablist" aria-label={t.datePicker.typeLabel}>
+    <div
+      className="date-picker-panel"
+      role="dialog"
+      aria-label={t.datePicker.label}
+    >
+      <div
+        className="date-picker-tabs"
+        role="tablist"
+        aria-label={t.datePicker.typeLabel}
+      >
         <button
           className={mode === "dates" ? "is-active" : ""}
           type="button"
@@ -701,8 +864,16 @@ function DatePickerPanel({
             >
               <i className="bi bi-chevron-left" aria-hidden="true" />
             </button>
-            <CalendarMonth monthDate={firstMonth} dateRange={dateRange} onSelectDate={onSelectDate} />
-            <CalendarMonth monthDate={secondMonth} dateRange={dateRange} onSelectDate={onSelectDate} />
+            <CalendarMonth
+              monthDate={firstMonth}
+              dateRange={dateRange}
+              onSelectDate={onSelectDate}
+            />
+            <CalendarMonth
+              monthDate={secondMonth}
+              dateRange={dateRange}
+              onSelectDate={onSelectDate}
+            />
             <button
               className="calendar-nav calendar-nav-next"
               type="button"
@@ -713,7 +884,10 @@ function DatePickerPanel({
             </button>
           </div>
 
-          <div className="flexible-date-options" aria-label={t.datePicker.flexibleLabel}>
+          <div
+            className="flexible-date-options"
+            aria-label={t.datePicker.flexibleLabel}
+          >
             {t.datePicker.flexibleDateOptions.map((option, index) => (
               <button
                 className={selectedDateFlexIndex === index ? "is-active" : ""}
@@ -761,7 +935,10 @@ function FlexibleStayPanel({
 
   return (
     <div className="flexible-stay-panel">
-      <section className="flexible-stay-section" aria-labelledby="stay-length-heading">
+      <section
+        className="flexible-stay-section"
+        aria-labelledby="stay-length-heading"
+      >
         <h3 id="stay-length-heading">{t.datePicker.stayLengthTitle}</h3>
         <div className="stay-length-options">
           {t.datePicker.stayLengths.map((option, index) => (
@@ -778,7 +955,10 @@ function FlexibleStayPanel({
         </div>
       </section>
 
-      <section className="flexible-stay-section" aria-labelledby="stay-month-heading">
+      <section
+        className="flexible-stay-section"
+        aria-labelledby="stay-month-heading"
+      >
         <h3 id="stay-month-heading">{t.datePicker.stayMonthTitle}</h3>
         <div className="month-card-row">
           {visibleMonths.map((month) => (
@@ -826,14 +1006,24 @@ function CalendarMonth({
   const { start, end } = dateRange;
 
   return (
-    <section className="calendar-month" aria-label={`${monthName} ${monthDate.getFullYear()}`}>
-      <h3>{monthName} {monthDate.getFullYear()}</h3>
+    <section
+      className="calendar-month"
+      aria-label={`${monthName} ${monthDate.getFullYear()}`}
+    >
+      <h3>
+        {monthName} {monthDate.getFullYear()}
+      </h3>
       <div className="calendar-weekdays">
-        {t.datePicker.weekdays.map((day) => <span key={day}>{day}</span>)}
+        {t.datePicker.weekdays.map((day) => (
+          <span key={day}>{day}</span>
+        ))}
       </div>
       <div className="calendar-grid">
         {calendarDays.map((day, index) => {
-          if (!day) return <span className="calendar-empty-day" key={`empty-${index}`} />;
+          if (!day)
+            return (
+              <span className="calendar-empty-day" key={`empty-${index}`} />
+            );
 
           const disabled = day < MIN_SELECTABLE_DATE;
           const isStart = Boolean(start && isSameDate(day, start));
@@ -845,7 +1035,9 @@ function CalendarMonth({
             inRange ? "is-in-range" : "",
             isStart && end && !isSameDate(start!, end) ? "is-range-start" : "",
             isEnd && start && !isSameDate(start, end!) ? "is-range-end" : "",
-          ].filter(Boolean).join(" ");
+          ]
+            .filter(Boolean)
+            .join(" ");
 
           return (
             <div className={cellClass} key={dateKey(day)}>
@@ -876,12 +1068,17 @@ function GuestSelector({
   variant?: "default" | "experience";
 }) {
   const { t } = useLanguage();
-  const rows = variant === "experience"
-    ? t.guests.rows.filter((row) => row.type !== "pets")
-    : t.guests.rows;
+  const rows =
+    variant === "experience"
+      ? t.guests.rows.filter((row) => row.type !== "pets")
+      : t.guests.rows;
 
   return (
-    <div className={`guest-selector${variant === "experience" ? " is-experience" : ""}`} role="dialog" aria-label={t.guests.label}>
+    <div
+      className={`guest-selector${variant === "experience" ? " is-experience" : ""}`}
+      role="dialog"
+      aria-label={t.guests.label}
+    >
       {rows.map((row) => {
         const minimumCount = 0;
         const count = counts[row.type];
@@ -891,7 +1088,9 @@ function GuestSelector({
             <div className="guest-counter-copy">
               <strong>{row.label}</strong>
               <span>{row.description}</span>
-              {"extra" in row && row.extra && <button type="button">{row.extra}</button>}
+              {"extra" in row && row.extra && (
+                <button type="button">{row.extra}</button>
+              )}
             </div>
             <div className="guest-counter-controls">
               <button
@@ -928,7 +1127,11 @@ function ServiceSelector({
   const { t } = useLanguage();
 
   return (
-    <div className="service-selector" role="dialog" aria-label={t.search.serviceType}>
+    <div
+      className="service-selector"
+      role="dialog"
+      aria-label={t.search.serviceType}
+    >
       {t.search.serviceOptions.map((option) => (
         <button
           className={`service-option${selected === option.key ? " is-active" : ""}`}
@@ -957,12 +1160,17 @@ function buildCalendarDays(monthDate: Date) {
 
   return [
     ...Array.from({ length: leadingEmptyDays }, () => null),
-    ...Array.from({ length: daysInMonth }, (_, index) => new Date(year, month, index + 1)),
+    ...Array.from(
+      { length: daysInMonth },
+      (_, index) => new Date(year, month, index + 1),
+    ),
   ];
 }
 
 function buildFlexibleMonths(offset: number) {
-  return Array.from({ length: 6 }, (_, index) => addMonths(CALENDAR_START_DATE, offset + index));
+  return Array.from({ length: 6 }, (_, index) =>
+    addMonths(CALENDAR_START_DATE, offset + index),
+  );
 }
 
 function dateKey(date: Date) {
@@ -980,8 +1188,12 @@ function formatSearchDate(date: Date, shortMonths: readonly string[]) {
 function formatSearchRange(range: DateRange, shortMonths: readonly string[]) {
   const { start, end } = range;
   if (!start) return null;
-  if (!end || isSameDate(start, end)) return formatSearchDate(start, shortMonths);
-  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+  if (!end || isSameDate(start, end))
+    return formatSearchDate(start, shortMonths);
+  if (
+    start.getMonth() === end.getMonth() &&
+    start.getFullYear() === end.getFullYear()
+  ) {
     return `${start.getDate()} – ${formatSearchDate(end, shortMonths)}`;
   }
   return `${formatSearchDate(start, shortMonths)} – ${formatSearchDate(end, shortMonths)}`;

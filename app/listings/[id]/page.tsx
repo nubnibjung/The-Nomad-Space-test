@@ -13,11 +13,6 @@ import { formatPrice } from "@/lib/utils";
 import type { GuestCounts, Listing } from "@/lib/types";
 import "./detail.css";
 
-const STAY_DATES = {
-  checkIn: "5/6/2026",
-  checkOut: "7/6/2026",
-  dateKeys: ["2026-06-05", "2026-06-06"],
-};
 const EMPTY_GUESTS: GuestCounts = { adults: 1, children: 0, infants: 0, pets: 0 };
 type AuthMode = "login" | "register";
 const DetailLocationMap = dynamic(() => import("@/components/DetailLocationMap"), {
@@ -46,8 +41,8 @@ const REVIEW_TAGS = [
 ] as const;
 
 const CALENDAR_MONTHS = [
-  { label: "มิถุนายน 2026", startOffset: 1, days: 30 },
-  { label: "กรกฎาคม 2026", startOffset: 3, days: 31 },
+  { label: "มิถุนายน 2026", year: 2026, monthIndex: 5, startOffset: 1, days: 30 },
+  { label: "กรกฎาคม 2026", year: 2026, monthIndex: 6, startOffset: 3, days: 31 },
 ];
 
 export default function ListingDetailPage() {
@@ -57,7 +52,26 @@ export default function ListingDetailPage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [anchorVisible, setAnchorVisible] = useState(false);
   const [anchorPriceVisible, setAnchorPriceVisible] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const listing = LISTINGS.find((item) => item.id === id);
+
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setIsSaved(false);
+      return;
+    }
+    let active = true;
+    fetch("/api/wishlist")
+      .then((response) => (response.ok ? response.json() : { ids: [] }))
+      .then((data: { ids?: string[] }) => {
+        if (active) setIsSaved((data.ids ?? []).includes(id));
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [status, id]);
 
   useEffect(() => {
     const hero = document.getElementById("photos");
@@ -89,6 +103,22 @@ export default function ListingDetailPage() {
     return false;
   }
 
+  function handleSave() {
+    if (!requireMember()) return;
+    const next = !isSaved;
+    setIsSaved(next);
+    fetch("/api/wishlist", {
+      method: next ? "POST" : "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId: id }),
+    }).catch(() => setIsSaved(!next));
+  }
+
+  function handleReserve() {
+    if (!requireMember()) return;
+    setBookingModalOpen(true);
+  }
+
   function handleChangeDates() {
     document.querySelector(".detail-calendar")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -108,7 +138,9 @@ export default function ListingDetailPage() {
   const oldPrice = Math.round(listing.pricePerNight * 1.2);
   const rooms = getRoomStats(listing);
   const guestCount = Math.max(1, Math.min(2, listing.maxGuests));
-  const isBookingAvailable = STAY_DATES.dateKeys.every((dateKey) => listing.availableDateKeys.includes(dateKey));
+  const stayDates = getStayDates(listing);
+  const isBookingAvailable = stayDates.dateKeys.length > 0;
+  const nightCount = Math.max(1, stayDates.dateKeys.length);
 
   return (
     <main className="listing-detail-page">
@@ -122,9 +154,9 @@ export default function ListingDetailPage() {
                 <Icon name="share" />
                 {t.detail.share}
               </button>
-              <button type="button" onClick={requireMember}>
+              <button type="button" className={isSaved ? "is-saved" : ""} onClick={handleSave}>
                 <Icon name="heart" />
-                {t.listing.save}
+                {isSaved ? t.listing.unsave : t.listing.save}
               </button>
             </div>
           </div>
@@ -161,7 +193,7 @@ export default function ListingDetailPage() {
                 </p>
                 <small>★ {listing.rating.toFixed(1)} · {listing.reviewCount} {t.detail.reviews}</small>
               </div>
-              <button type="button" onClick={requireMember}>{t.detail.reserve}</button>
+              <button type="button" onClick={handleReserve}>{t.detail.reserve}</button>
             </div>
           )}
         </nav>
@@ -223,10 +255,10 @@ export default function ListingDetailPage() {
 
             <section className="detail-calendar">
               <h2>{t.detail.stayTitle} {listing.neighborhood.split(",")[0]}</h2>
-              <p>{STAY_DATES.checkIn} - {STAY_DATES.checkOut}</p>
+              <p>{stayDates.checkIn} - {stayDates.checkOut}</p>
               <div className="detail-calendar-grid">
                 {CALENDAR_MONTHS.map((month) => (
-                  <CalendarMonth key={month.label} month={month} />
+                  <CalendarMonth key={month.label} month={month} highlightKeys={stayDates.highlightKeys} />
                 ))}
               </div>
             </section>
@@ -248,11 +280,11 @@ export default function ListingDetailPage() {
               <div className={`detail-booking-fields${isBookingAvailable ? "" : " is-invalid"}`}>
                 <label>
                   {t.detail.checkIn}
-                  <strong>{STAY_DATES.checkIn}</strong>
+                  <strong>{stayDates.checkIn}</strong>
                 </label>
                 <label>
                   {t.detail.checkOut}
-                  <strong>{STAY_DATES.checkOut}</strong>
+                  <strong>{stayDates.checkOut}</strong>
                 </label>
                 <label className="is-wide">
                   {t.search.guests}
@@ -268,7 +300,7 @@ export default function ListingDetailPage() {
                   {t.detail.unavailableDates}
                 </strong>
               )}
-              <button type="button" onClick={isBookingAvailable ? requireMember : handleChangeDates}>
+              <button type="button" onClick={isBookingAvailable ? handleReserve : handleChangeDates}>
                 {isBookingAvailable ? t.detail.reserve : t.detail.changeDates}
               </button>
               {isBookingAvailable && <small>{t.detail.noCharge}</small>}
@@ -384,6 +416,16 @@ export default function ListingDetailPage() {
         </div>
       </footer>
       {authModalOpen && <DetailAuthModal onClose={() => setAuthModalOpen(false)} />}
+      {bookingModalOpen && (
+        <BookingConfirmModal
+          listing={listing}
+          stayDates={stayDates}
+          guestCount={guestCount}
+          nightCount={nightCount}
+          totalPrice={listing.pricePerNight * nightCount}
+          onClose={() => setBookingModalOpen(false)}
+        />
+      )}
     </main>
   );
 }
@@ -591,7 +633,106 @@ function getRegisterErrorMessage(
   return authText.registerFailed;
 }
 
-function CalendarMonth({ month }: { month: { label: string; startOffset: number; days: number } }) {
+function BookingConfirmModal({
+  listing,
+  stayDates,
+  guestCount,
+  nightCount,
+  totalPrice,
+  onClose,
+}: {
+  listing: Listing;
+  stayDates: { checkIn: string; checkOut: string };
+  guestCount: number;
+  nightCount: number;
+  totalPrice: number;
+  onClose: () => void;
+}) {
+  const { locale } = useLanguage();
+  const [confirmed, setConfirmed] = useState(false);
+
+  return (
+    <div className="booking-modal-backdrop" role="presentation" onClick={onClose}>
+      <section
+        className="booking-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="booking-modal-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button className="booking-modal-close" type="button" aria-label="ปิด" onClick={onClose}>
+          ×
+        </button>
+
+        {confirmed ? (
+          <div className="booking-modal-success">
+            <span className="booking-modal-check" aria-hidden="true">
+              <i className="bi bi-check-lg" />
+            </span>
+            <h2 id="booking-modal-title">จองสำเร็จ!</h2>
+            <p>ยืนยันการจอง “{listing.title}” เรียบร้อยแล้ว</p>
+            <button type="button" className="booking-modal-confirm" onClick={onClose}>
+              เสร็จสิ้น
+            </button>
+          </div>
+        ) : (
+          <>
+            <h2 id="booking-modal-title">ยืนยันการจอง</h2>
+            <div className="booking-modal-listing">
+              <span
+                className="booking-modal-thumb"
+                style={{ backgroundImage: `url("${listing.images[0]}")` }}
+                aria-hidden="true"
+              />
+              <div>
+                <strong>{listing.title}</strong>
+                <small>{listing.neighborhood}</small>
+                <small>★ {listing.rating.toFixed(1)} · {listing.reviewCount} รีวิว</small>
+              </div>
+            </div>
+
+            <dl className="booking-modal-summary">
+              <div>
+                <dt>เช็คอิน</dt>
+                <dd>{stayDates.checkIn}</dd>
+              </div>
+              <div>
+                <dt>เช็คเอาท์</dt>
+                <dd>{stayDates.checkOut}</dd>
+              </div>
+              <div>
+                <dt>เกสต์</dt>
+                <dd>{guestCount} คน</dd>
+              </div>
+              <div>
+                <dt>ระยะเวลา</dt>
+                <dd>{nightCount} คืน</dd>
+              </div>
+            </dl>
+
+            <div className="booking-modal-total">
+              <span>ยอดรวม</span>
+              <strong>{formatPrice(totalPrice, locale)}</strong>
+            </div>
+
+            <button type="button" className="booking-modal-confirm" onClick={() => setConfirmed(true)}>
+              ยืนยันการจอง
+            </button>
+            <p className="booking-modal-note">ยังไม่มีการเรียกเก็บเงินจากคุณ</p>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function CalendarMonth({
+  month,
+  highlightKeys,
+}: {
+  month: { label: string; year: number; monthIndex: number; startOffset: number; days: number };
+  highlightKeys: Set<string>;
+}) {
   return (
     <div className="detail-month">
       <strong>{month.label}</strong>
@@ -599,7 +740,8 @@ function CalendarMonth({ month }: { month: { label: string; startOffset: number;
         {Array.from({ length: 35 }, (_, index) => {
           const day = index - month.startOffset + 1;
           const isVisible = day > 0 && day <= month.days;
-          const active = month.label.startsWith("มิถุนายน") && day >= 12 && day <= 14;
+          const dateKey = `${month.year}-${String(month.monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+          const active = isVisible && highlightKeys.has(dateKey);
 
           return (
             <span className={active ? "is-active" : ""} key={index}>
@@ -610,6 +752,55 @@ function CalendarMonth({ month }: { month: { label: string; startOffset: number;
       </div>
     </div>
   );
+}
+
+function getStayDates(listing: Listing) {
+  const keys = [...listing.availableDateKeys].sort();
+  if (keys.length === 0) {
+    return { checkIn: "", checkOut: "", dateKeys: [] as string[], highlightKeys: new Set<string>() };
+  }
+
+  // หา 2 คืนติดกันคู่แรก ถ้าไม่มีก็ใช้คืนแรกคืนเดียว
+  let startIndex = 0;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (dayDiff(keys[i], keys[i + 1]) === 1) {
+      startIndex = i;
+      break;
+    }
+  }
+
+  const firstNight = keys[startIndex];
+  const hasSecondNight = keys[startIndex + 1] && dayDiff(firstNight, keys[startIndex + 1]) === 1;
+  const lastNight = hasSecondNight ? keys[startIndex + 1] : firstNight;
+  const dateKeys = hasSecondNight ? [firstNight, lastNight] : [firstNight];
+
+  const checkInDate = parseDateKey(firstNight);
+  const checkOutDate = parseDateKey(lastNight);
+  checkOutDate.setDate(checkOutDate.getDate() + 1);
+
+  return {
+    checkIn: formatDateKey(checkInDate),
+    checkOut: formatDateKey(checkOutDate),
+    dateKeys,
+    highlightKeys: new Set<string>([...dateKeys, toDateKey(checkOutDate)]),
+  };
+}
+
+function parseDateKey(key: string) {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function toDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function formatDateKey(date: Date) {
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+}
+
+function dayDiff(a: string, b: string) {
+  return Math.round((parseDateKey(b).getTime() - parseDateKey(a).getTime()) / 86400000);
 }
 
 function ScoreBars() {
