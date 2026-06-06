@@ -491,9 +491,10 @@ input:focus-visible {
 }
 
 .search-pill {
+  position: relative;
   display: grid;
   grid-template-columns: 1.25fr 0.9fr 0.8fr auto;
-  align-items: center;
+  align-items: stretch;
   height: 66px;
   border: 1px solid var(--border);
   border-radius: 100px;
@@ -7609,26 +7610,26 @@ input:focus-visible {
 /* Default field-specific negative insets and border-radius for non-adjacent states */
 .search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active)::after {
-  inset: 0 -22px 0 -20px !important;
+  inset: -12px -22px -12px -20px !important;
   border-radius: 999px !important;
 }
 
 .search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active)::after {
-  inset: 0 -22px !important;
+  inset: -12px -22px !important;
   border-radius: 999px !important;
 }
 
 .search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: 0 -76px 0 -22px !important;
+  inset: -12px -76px -12px -22px !important;
   border-radius: 999px !important;
 }
 
 /* 1. Field 1 is Hovered, Field 2 is Active: Right side of Field 1 is flat and extends under Field 2 */
 .search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after {
-  inset: 0 -30px 0 -20px !important;
+  inset: -12px -30px -12px -20px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-top-left-radius: 999px !important;
@@ -7638,7 +7639,7 @@ input:focus-visible {
 /* 2. Field 2 is Hovered, Field 1 is Active: Left side of Field 2 is flat and extends under Field 1 */
 .search-morph.is-open .search-field:nth-of-type(1).is-active+.search-field:nth-of-type(2):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(1).is-active+.search-field:nth-of-type(2):hover:not(.is-active)::after {
-  inset: 0 -22px 0 -30px !important;
+  inset: -12px -22px -12px -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
@@ -7648,7 +7649,7 @@ input:focus-visible {
 /* 3. Field 2 is Hovered, Field 3 is Active: Right side of Field 2 is flat and extends under Field 3 */
 .search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after {
-  inset: 0 -30px 0 -22px !important;
+  inset: -12px -30px -12px -22px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   border-top-left-radius: 999px !important;
@@ -7658,7 +7659,7 @@ input:focus-visible {
 /* 4. Field 3 is Hovered, Field 2 is Active: Left side of Field 3 is flat and extends under Field 2 */
 .search-morph.is-open .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2).is-active+.search-field:nth-of-type(3):hover:not(.is-active)::after {
-  inset: 0 -76px 0 -30px !important;
+  inset: -12px -76px -12px -30px !important;
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
   border-top-right-radius: 999px !important;
