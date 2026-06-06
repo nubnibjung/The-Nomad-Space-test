@@ -64,9 +64,12 @@ export function Header({
   }, [activeCategory]);
 
   useLayoutEffect(() => {
+    const pill = pillRef.current;
+    if (!pill) return;
+
+    let resizeObserver: ResizeObserver | null = null;
+
     function measureActiveField() {
-      const pill = pillRef.current;
-      if (!pill) return;
       const activeFieldEl = pill.querySelector<HTMLElement>(".search-field.is-active");
       setHighlightStyle(
         activeFieldEl ? { left: activeFieldEl.offsetLeft, width: activeFieldEl.offsetWidth } : null,
@@ -74,8 +77,22 @@ export function Header({
     }
 
     measureActiveField();
+
+    const fields = pill.querySelectorAll(".search-field");
+    if (typeof window !== "undefined" && "ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(() => {
+        measureActiveField();
+      });
+      fields.forEach((field) => resizeObserver?.observe(field));
+    }
+
     window.addEventListener("resize", measureActiveField);
-    return () => window.removeEventListener("resize", measureActiveField);
+    return () => {
+      window.removeEventListener("resize", measureActiveField);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, [isSearchOpen, activeSearchStep, activeCategory, isScrolled]);
 
   const isExperienceSearch = activeCategory === "loft";
@@ -263,8 +280,14 @@ export function Header({
                 aria-hidden
               />
             )}
-            <label
+            <div
               className={`search-field${activeField === "where" ? " is-active" : ""}${query ? " has-value" : ""}`}
+              onClick={(e) => {
+                const input = e.currentTarget.querySelector("input");
+                if (input && document.activeElement !== input) {
+                  input.focus();
+                }
+              }}
             >
               <span className="expanded-field-label">{t.search.where}</span>
               <input
@@ -291,7 +314,7 @@ export function Header({
               <span className="compact-field-label">
                 <strong>{query || t.search.anyWhere}</strong>
               </span>
-            </label>
+            </div>
 
             <div
               role="button"

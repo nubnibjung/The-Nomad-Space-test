@@ -7510,14 +7510,6 @@ input:focus-visible {
   content: none !important;
 }
 
-/* Clear any straight borders or incorrect insets on duplicate rules */
-.search-morph.is-open .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after,
-.top-header.is-search-active .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after,
-.search-morph.is-open .search-field.is-active + .search-field:hover:not(.is-active)::after,
-.top-header.is-search-active .search-field.is-active + .search-field:hover:not(.is-active)::after {
-  border-radius: 999px !important;
-}
-
 /* Unified premium hover backgrounds using ::after with negative insets */
 .search-morph.is-open .search-field:hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:hover:not(.is-active)::after {
@@ -7530,20 +7522,65 @@ input:focus-visible {
   transition: background-color 220ms var(--ease-standard), opacity 180ms var(--ease-standard);
 }
 
-/* Field-specific negative insets to extend background under adjacent elements */
+/* Default field-specific negative insets and border-radius for non-adjacent states */
 .search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active)::after {
   inset: 0 -22px 0 -20px !important;
+  border-radius: 999px !important;
 }
 
 .search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active)::after {
   inset: 0 -22px !important;
+  border-radius: 999px !important;
 }
 
 .search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
 .top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
   inset: 0 -120px 0 -22px !important;
+  border-radius: 999px !important;
+}
+
+/* ─── Premium Airbnb-style hover transitions for adjacent active/hover states ─── */
+
+/* 1. Field 1 is Hovered, Field 2 is Active: Right side of Field 1 is flat and extends under Field 2 */
+.search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active):has(+ .search-field:nth-of-type(2).is-active)::after {
+  inset: 0 -36px 0 -20px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 999px !important;
+  border-bottom-left-radius: 999px !important;
+}
+
+/* 2. Field 2 is Hovered, Field 1 is Active: Left side of Field 2 is flat and extends under Field 1 */
+.search-morph.is-open .search-field:nth-of-type(1).is-active + .search-field:nth-of-type(2):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(1).is-active + .search-field:nth-of-type(2):hover:not(.is-active)::after {
+  inset: 0 -22px 0 -36px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
+}
+
+/* 3. Field 2 is Hovered, Field 3 is Active: Right side of Field 2 is flat and extends under Field 3 */
+.search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active):has(+ .search-field:nth-of-type(3).is-active)::after {
+  inset: 0 -36px 0 -22px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: 999px !important;
+  border-bottom-left-radius: 999px !important;
+}
+
+/* 4. Field 3 is Hovered, Field 2 is Active: Left side of Field 3 is flat and extends under Field 2 */
+.search-morph.is-open .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):hover:not(.is-active)::after {
+  inset: 0 -120px 0 -36px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
 }
 
 /* Search Button Hover Integration: Highlight third field too! */
@@ -7555,6 +7592,15 @@ input:focus-visible {
   background: var(--search-field-hover) !important;
   content: "" !important;
   pointer-events: none !important;
+}
+
+/* Search Button Hover Integration: If Field 2 is active, the left side of Field 3 is flat and extends under Field 2 */
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(2).is-active + .search-field:nth-of-type(3):not(.is-active)::after {
+  inset: 0 -120px 0 -36px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 999px !important;
+  border-bottom-right-radius: 999px !important;
 }
 
 .search-pill:has(.search-button:hover) .search-field:nth-of-type(3)::before {
