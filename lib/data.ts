@@ -691,6 +691,31 @@ function getGuestCapacity(listing: BaseListing) {
   return 2;
 }
 
+// Listing data (title/neighborhood) is stored in English. We append the Thai
+// names of the places each listing mentions to its searchable text, so Thai
+// queries — including partial ones typed character by character — match by
+// plain substring just like English queries do.
+const EN_TO_TH_LOCATIONS: Record<string, string> = {
+  "ari samphan": "อารีย์สัมพันธ์",
+  "ari": "อารีย์",
+  "saphan khwai": "สะพานควาย",
+  "chatuchak": "จตุจักร",
+  "phahonyothin": "พหลโยธิน",
+  "pradiphat": "ประดิพัทธ์",
+  "kamphaeng phet": "กำแพงเพชร",
+  "asok": "อโศก",
+  "thong lo": "ทองหล่อ",
+  "bangkok": "กรุงเทพ กรุงเทพมหานคร กรุงเทพฯ",
+};
+
+export function thaiLocationKeywords(text: string) {
+  const lower = text.toLowerCase();
+  const matched = Object.entries(EN_TO_TH_LOCATIONS)
+    .filter(([english]) => lower.includes(english))
+    .map(([, thai]) => thai);
+  return matched.join(" ");
+}
+
 export function localSearch(
   listings: Listing[],
   query: string,
@@ -700,13 +725,16 @@ export function localSearch(
   sortBy: SortOption = "default",
   criteria?: SearchCriteria,
 ): Listing[] {
-  const q = normalizeSearchQuery(query).toLowerCase();
+  const q = normalizeSearchQuery(query).toLowerCase().trim();
   const requiredGuests = criteria ? getRequiredGuestCapacity(criteria) : 0;
   let results = listings.filter((l) => {
     if (category !== "all" && l.category !== category) return false;
     if (l.lat > bounds.north || l.lat < bounds.south) return false;
     if (l.lng > bounds.east || l.lng < bounds.west) return false;
-    if (q && !`${l.title} ${l.category} ${l.neighborhood}`.toLowerCase().includes(q)) return false;
+    if (q) {
+      const haystack = `${l.title} ${l.category} ${l.neighborhood} ${thaiLocationKeywords(`${l.title} ${l.neighborhood}`)}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     if (l.pricePerNight < filters.priceMin || l.pricePerNight > filters.priceMax) return false;
     if (l.rating < filters.minRating) return false;
     if (requiredGuests > 0 && l.maxGuests < requiredGuests) return false;

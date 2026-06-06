@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useLanguage } from "@/lib/i18n";
+import { thaiLocationKeywords } from "@/lib/data";
 
 type Suggestion = {
   id: string;
@@ -25,7 +26,8 @@ export function LocationSuggest({ query, onSelect, onNearby, variant = "default"
         (suggestion) =>
           suggestion.id.includes(q) ||
           suggestion.name.toLowerCase().includes(q) ||
-          suggestion.desc.toLowerCase().includes(q),
+          suggestion.desc.toLowerCase().includes(q) ||
+          thaiLocationKeywords(suggestion.name).includes(q),
       )
     : suggestions;
 

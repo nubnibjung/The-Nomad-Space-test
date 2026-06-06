@@ -4057,20 +4057,10 @@ input:focus-visible {
   min-height: 252px;
 }
 
-.top-header.is-experience-search:not(.is-scrolled)::before {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 8px;
-  background: #4b3545;
-  content: "";
-}
-
 .top-header.is-experience-search:not(.is-scrolled) .header-inner {
   height: 120px;
   min-height: 120px;
-  padding: 8px 38px 0;
+  padding: 0 38px;
 }
 
 .top-header.is-experience-search:not(.is-scrolled) .nomad-tabs {
