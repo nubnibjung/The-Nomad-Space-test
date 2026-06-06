@@ -92,7 +92,9 @@ export default function DiscoveryPage() {
           onBack={() => setResultsSection(null)}
           onSelect={(listing) => {
             handleListingSelect(listing);
-            router.push(`/listings/${listing.id}`);
+            if (activeCategory !== "loft" && activeCategory !== "coffee") {
+              router.push(`/listings/${listing.id}`);
+            }
           }}
         />
       );
@@ -109,7 +111,9 @@ export default function DiscoveryPage() {
         onOpenResults={setResultsSection}
         onSelect={(listing) => {
           handleListingSelect(listing);
-          router.push(`/listings/${listing.id}`);
+          if (activeCategory !== "loft" && activeCategory !== "coffee") {
+            router.push(`/listings/${listing.id}`);
+          }
         }}
         previousLabel={t.home.previous}
         nextLabel={t.home.next}
@@ -191,7 +195,9 @@ export default function DiscoveryPage() {
             onHover={setHoveredId}
             onSelect={(listing) => {
               handleListingSelect(listing);
-              router.push(`/listings/${listing.id}`);
+              if (activeCategory !== "loft" && activeCategory !== "coffee") {
+                router.push(`/listings/${listing.id}`);
+              }
             }}
             onBoundsChange={handleBoundsChange}
             onHide={() => {
