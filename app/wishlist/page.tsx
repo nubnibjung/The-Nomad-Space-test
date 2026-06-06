@@ -4,20 +4,33 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { LISTINGS } from "@/lib/data";
 
+type WishlistItem = {
+  listing_id: string;
+  name: string;
+};
+
 export default function WishlistPage() {
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
 
     fetch("/api/wishlist")
-      .then((response) => (response.ok ? response.json() : { ids: [] }))
-      .then((data: { ids?: string[] }) => {
-        if (active) setSavedIds(data.ids ?? []);
+      .then((response) => (response.ok ? response.json() : { ids: [], wishlists: [] }))
+      .then((data: { ids?: string[]; wishlists?: WishlistItem[] }) => {
+        if (active) {
+          setSavedIds(data.ids ?? []);
+          setWishlistItems(data.wishlists ?? []);
+        }
       })
       .catch(() => {
-        if (active) setSavedIds([]);
+        if (active) {
+          setSavedIds([]);
+          setWishlistItems([]);
+        }
       })
       .finally(() => {
         if (active) setIsLoading(false);
@@ -28,12 +41,41 @@ export default function WishlistPage() {
     };
   }, []);
 
-  const savedListings = useMemo(
-    () => savedIds
-      .map((id) => LISTINGS.find((listing) => listing.id === id))
-      .filter((listing): listing is (typeof LISTINGS)[number] => Boolean(listing)),
-    [savedIds],
-  );
+  const groupedWishlists = useMemo(() => {
+    const groups: { [name: string]: string[] } = {};
+    wishlistItems.forEach((item) => {
+      if (!groups[item.name]) {
+        groups[item.name] = [];
+      }
+      groups[item.name].push(item.listing_id);
+    });
+    return groups;
+  }, [wishlistItems]);
+
+  const wishlistGroups = useMemo(() => {
+    return Object.entries(groupedWishlists).map(([name, ids]) => {
+      const listingsInWishlist = ids
+        .map((id) => LISTINGS.find((listing) => listing.id === id))
+        .filter((l): l is (typeof LISTINGS)[number] => Boolean(l));
+
+      const coverImage = listingsInWishlist[0]?.images[0] || "";
+      
+      return {
+        name,
+        count: listingsInWishlist.length,
+        coverImage,
+        listings: listingsInWishlist,
+      };
+    }).filter(group => group.count > 0);
+  }, [groupedWishlists]);
+
+  const activeListings = useMemo(() => {
+    if (!selectedGroup) return [];
+    const ids = groupedWishlists[selectedGroup] || [];
+    return ids
+      .map((id) => LISTINGS.find((l) => l.id === id))
+      .filter((l): l is (typeof LISTINGS)[number] => Boolean(l));
+  }, [selectedGroup, groupedWishlists]);
 
   return (
     <main className="wishlist-page">
@@ -60,31 +102,69 @@ export default function WishlistPage() {
       </header>
 
       <section className="wishlist-content">
-        <h1>Wishlist</h1>
+        {selectedGroup ? (
+          <div className="wishlist-detail-view">
+            <button className="wishlist-back-btn" onClick={() => setSelectedGroup(null)}>
+              <i className="bi bi-chevron-left" /> กลับไปหน้า Wishlist ทั้งหมด
+            </button>
+            <h1 className="wishlist-group-title">{selectedGroup}</h1>
 
-        {isLoading ? (
-          <div className="wishlist-empty">
-            <h2>กำลังโหลดรายการที่บันทึกไว้</h2>
-          </div>
-        ) : savedListings.length > 0 ? (
-          <div className="wishlist-grid">
-            {savedListings.map((listing, index) => (
-              <Link className="wishlist-card" href={`/listings/${listing.id}`} key={listing.id}>
-                <span
-                  className="wishlist-cover"
-                  style={{ backgroundImage: `url("${listing.images[0]}")` }}
-                />
-                <strong>{index + 1}</strong>
-                <small>บันทึกไว้ {savedListings.length.toLocaleString("th-TH")} รายการ</small>
-              </Link>
-            ))}
+            {activeListings.length > 0 ? (
+              <div className="wishlist-listings-grid">
+                {activeListings.map((listing) => (
+                  <Link className="wishlist-listing-card" href={`/listings/${listing.id}`} key={listing.id}>
+                    <span
+                      className="wishlist-listing-cover"
+                      style={{ backgroundImage: `url("${listing.images[0]}")` }}
+                    />
+                    <div className="wishlist-listing-info">
+                      <strong>{listing.title}</strong>
+                      <p>{listing.neighborhood}</p>
+                      <span>฿{listing.pricePerNight.toLocaleString("th-TH")} / คืน</span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="wishlist-empty">
+                <h2>ไม่พบรายการในกลุ่มนี้</h2>
+              </div>
+            )}
           </div>
         ) : (
-          <div className="wishlist-empty">
-            <h2>ยังไม่มีรายการที่บันทึกไว้</h2>
-            <p>กดหัวใจบนที่พักหรือบริการที่ชอบ แล้วรายการจะมาแสดงที่นี่</p>
-            <Link href="/">เริ่มค้นหา</Link>
-          </div>
+          <>
+            <h1>Wishlist</h1>
+
+            {isLoading ? (
+              <div className="wishlist-empty">
+                <h2>กำลังโหลดรายการที่บันทึกไว้</h2>
+              </div>
+            ) : wishlistGroups.length > 0 ? (
+              <div className="wishlist-grid">
+                {wishlistGroups.map((group) => (
+                  <div
+                    className="wishlist-card-container"
+                    key={group.name}
+                    onClick={() => setSelectedGroup(group.name)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <span
+                      className="wishlist-cover"
+                      style={{ backgroundImage: `url("${group.coverImage}")` }}
+                    />
+                    <strong>{group.name}</strong>
+                    <small>บันทึกไว้ {group.count.toLocaleString("th-TH")} รายการ</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="wishlist-empty">
+                <h2>ยังไม่มีรายการที่บันทึกไว้</h2>
+                <p>กดหัวใจบนที่พักหรือบริการที่ชอบ แล้วรายการจะมาแสดงที่นี่</p>
+                <Link href="/">เริ่มค้นหา</Link>
+              </div>
+            )}
+          </>
         )}
       </section>
     </main>

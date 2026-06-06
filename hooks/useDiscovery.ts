@@ -11,13 +11,13 @@ type SearchResetOptions = {
 };
 
 const INITIAL_GUEST_COUNTS: GuestCounts = {
-  adults: 1,
+  adults: 0,
   children: 0,
   infants: 0,
   pets: 0,
 };
 const MIN_GUEST_COUNTS: GuestCounts = {
-  adults: 1,
+  adults: 0,
   children: 0,
   infants: 0,
   pets: 0,
@@ -123,6 +123,7 @@ export function useDiscovery() {
 
       if (shouldCollapse) {
         setIsScrolled((isCollapsed) => (isCollapsed ? isCollapsed : true));
+        setIsSearchOpen(false);
         return;
       }
 
@@ -217,7 +218,7 @@ export function useDiscovery() {
     setSelectedId(listing.id);
   }
 
-  function handleSaveToggle(id: string) {
+  function handleSaveToggle(id: string, name?: string) {
     setSavedIds((prev) => {
       const next = new Set(prev);
       const isSaved = next.has(id);
@@ -227,7 +228,7 @@ export function useDiscovery() {
         next.add(id);
       }
 
-      syncWishlistToggle(id, isSaved).catch(() => setSavedIds(prev));
+      syncWishlistToggle(id, isSaved, name).catch(() => setSavedIds(prev));
       return next;
     });
   }
@@ -254,11 +255,11 @@ export function useDiscovery() {
   };
 }
 
-async function syncWishlistToggle(id: string, isSaved: boolean) {
+async function syncWishlistToggle(id: string, isSaved: boolean, name?: string) {
   const response = await fetch("/api/wishlist", {
     method: isSaved ? "DELETE" : "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ listingId: id }),
+    body: JSON.stringify({ listingId: id, name }),
   });
 
   if (!response.ok) {

@@ -112,7 +112,7 @@ export default function ListingDetailPage() {
 
   return (
     <main className="listing-detail-page">
-      <DetailHeader />
+      <DetailHeader isHidden={anchorVisible} />
       <article className="listing-detail-shell">
         <section className="listing-detail-hero" id="photos">
           <div className="listing-detail-title-row">
@@ -388,9 +388,9 @@ export default function ListingDetailPage() {
   );
 }
 
-function DetailHeader() {
+function DetailHeader({ isHidden }: { isHidden: boolean }) {
   return (
-    <header className="detail-top-header">
+    <header className={`detail-top-header${isHidden ? " is-hidden" : ""}`}>
       <Link className="detail-top-brand" href="/">
         <svg viewBox="0 0 32 32" aria-hidden="true">
           <path d="M5 25.5V11.2L16 4l11 7.2v14.3h-5.8V14.7L16 11.3l-5.2 3.4v10.8H5Z" />
@@ -401,16 +401,14 @@ function DetailHeader() {
 
       <Link className="detail-top-pill" href="/">
         <span className="detail-top-field">
-          <small>ที่ไหนก็ได้</small>
+          <strong>ที่ไหนก็ได้</strong>
         </span>
         <span className="detail-top-divider" />
         <span className="detail-top-field">
-          <small>เช็คอิน / เช็คเอาท์</small>
           <strong>เมื่อไรก็ได้</strong>
         </span>
         <span className="detail-top-divider" />
         <span className="detail-top-field">
-          <small>เกสต์</small>
           <strong>เพิ่มเกสต์</strong>
         </span>
         <span className="detail-top-search">

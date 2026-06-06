@@ -4453,7 +4453,7 @@ input:focus-visible {
 .search-morph.is-open .search-field:hover:not(.is-active)::after,
 .top-header.is-scrolled.is-search-active .search-field:hover:not(.is-active)::after {
   position: absolute;
-  inset: 0 -35px;
+  inset: 0;
   z-index: -1;
   border-radius: 32px;
   background: var(--search-field-hover);
@@ -4465,7 +4465,7 @@ input:focus-visible {
 .search-morph.is-open .search-field.is-active::after,
 .top-header.is-scrolled.is-search-active .search-field.is-active::after {
   position: absolute;
-  inset: 0 -35px;
+  inset: 0;
   z-index: -1;
   border-radius: 32px;
   background: transparent;
@@ -4490,16 +4490,18 @@ input:focus-visible {
   box-shadow: none;
 }
 
+.search-morph.is-open .search-field.is-active::before,
+.top-header.is-scrolled.is-search-active .search-field.is-active::before,
 .search-morph.is-open .search-field.is-active::after,
 .top-header.is-scrolled.is-search-active .search-field.is-active::after {
-  content: none;
+  content: none !important;
 }
 
 /* Hover preview on an inactive field: a grey rounded pill using ::after for overlap */
 .search-morph.is-open .search-field:hover:not(.is-active),
 .top-header.is-scrolled.is-search-active .search-field:hover:not(.is-active) {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   margin-inline: 0;
   padding-inline: 36px;
   background: transparent;
@@ -4509,13 +4511,27 @@ input:focus-visible {
 .search-morph.is-open .search-field:hover:not(.is-active)::after,
 .top-header.is-scrolled.is-search-active .search-field:hover:not(.is-active)::after {
   position: absolute;
-  inset: 0 -35px;
+  inset: 0;
   z-index: -1;
   border-radius: 999px;
   background: var(--search-field-hover);
   content: "";
   pointer-events: none;
   transition: background-color 220ms var(--ease-standard), opacity 180ms var(--ease-standard);
+}
+
+.search-morph.is-open .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after,
+.top-header.is-scrolled.is-search-active .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after {
+  inset: 0 -14px 0 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.search-morph.is-open .search-field.is-active + .search-field:hover:not(.is-active)::after,
+.top-header.is-scrolled.is-search-active .search-field.is-active + .search-field:hover:not(.is-active)::after {
+  inset: 0 0 0 -14px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .search-morph.is-open .search-field:hover:not(.is-active)::before,
@@ -5968,9 +5984,9 @@ input:focus-visible {
 }
 
 .detail-anchor-bar {
-  position: sticky;
-  top: 74px;
-  z-index: 20;
+  position: fixed;
+  top: 0;
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -7193,3 +7209,436 @@ input:focus-visible {
     gap: 40px;
   }
 }
+
+/* ─── Wishlist Naming Modal Styles ──────────────────── */
+
+.wishlist-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 24px;
+}
+
+.wishlist-modal-box {
+  background: #ffffff;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.wishlist-modal-header {
+  padding: 24px;
+  border-bottom: 1px solid #eeeeee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wishlist-modal-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #222222;
+}
+
+.wishlist-modal-back {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #222222;
+  font-size: 18px;
+  transition: background 0.2s ease;
+}
+
+.wishlist-modal-back:hover {
+  background: #f7f7f7;
+}
+
+.wishlist-modal-body {
+  padding: 32px 24px;
+}
+
+.wishlist-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wishlist-form-input {
+  border: 1px solid #b0b0b0;
+  border-radius: 8px;
+  padding: 18px 16px;
+  font-size: 16px;
+  width: 100%;
+  transition: border-color 0.2s ease;
+  outline: none;
+  color: #222222;
+}
+
+.wishlist-form-input:focus {
+  border-color: #222222;
+  box-shadow: 0 0 0 2px #22222215;
+}
+
+.wishlist-char-count {
+  font-size: 12px;
+  color: #717171;
+  font-weight: 400;
+}
+
+.wishlist-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #eeeeee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wishlist-btn-text {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222222;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.wishlist-btn-text:hover {
+  background: #f7f7f7;
+}
+
+.wishlist-btn-submit {
+  background: #222222;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.wishlist-btn-submit:hover:not(:disabled) {
+  background: #000000;
+}
+
+.wishlist-btn-submit:disabled {
+  background: #dddddd;
+  color: #929292;
+  cursor: not-allowed;
+}
+
+/* ─── Wishlist Page Named Collection Styles ──────────── */
+
+.wishlist-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: #222222;
+  transition: transform 0.2s ease;
+}
+
+.wishlist-card-container:hover {
+  transform: translateY(-4px);
+}
+
+.wishlist-detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.wishlist-back-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #222222;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  align-self: flex-start;
+  transition: opacity 0.2s ease;
+}
+
+.wishlist-back-btn:hover {
+  opacity: 0.7;
+}
+
+.wishlist-listings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.wishlist-listing-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dddddd;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #222222;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wishlist-listing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.wishlist-listing-cover {
+  aspect-ratio: 1.5;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+}
+
+.wishlist-listing-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wishlist-listing-info strong {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222222;
+  /* Multi-line ellipsis */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wishlist-listing-info p {
+  font-size: 14px;
+  color: #717171;
+  margin: 0;
+}
+
+.wishlist-listing-info span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222222;
+}
+
+/* ─── Search Bar UI & Hover Overlaps Refinements ──────────────── */
+
+/* Hide divider lines on active or hovered states */
+.search-morph.is-open .search-field.is-active::before,
+.search-morph.is-open .search-field.is-active + .search-field::before,
+.top-header.is-search-active .search-field.is-active::before,
+.top-header.is-search-active .search-field.is-active + .search-field::before {
+  opacity: 0 !important;
+}
+
+.search-morph.is-open .search-field:hover::before,
+.search-morph.is-open .search-field:hover + .search-field::before,
+.top-header.is-search-active .search-field:hover::before,
+.top-header.is-search-active .search-field:hover + .search-field::before {
+  opacity: 0 !important;
+}
+
+/* Stacking contexts for search fields to avoid cut-offs and overlap bugs */
+.search-morph.is-open .search-field,
+.top-header.is-search-active .search-field {
+  position: relative !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Make sure active field sits at z-index 4 so text is on top of active white highlight */
+.search-morph.is-open .search-field.is-active,
+.top-header.is-search-active .search-field.is-active {
+  z-index: 4 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Active highlight white pill sits at z-index 2 */
+.search-field-highlight {
+  z-index: 2 !important;
+}
+
+/* Inactive hovered search fields stay at z-index 1 (below white highlight)
+   so their background goes under the active highlight pill, filling the gaps */
+.search-morph.is-open .search-field:hover:not(.is-active),
+.top-header.is-search-active .search-field:hover:not(.is-active) {
+  z-index: 1 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Disable duplicate background and before/after styles */
+.search-morph.is-open .search-field:hover:not(.is-active)::before,
+.search-morph.is-open .search-field.is-active::before,
+.top-header.is-search-active .search-field:hover:not(.is-active)::before,
+.top-header.is-search-active .search-field.is-active::before {
+  content: none !important;
+}
+
+/* Clear any straight borders or incorrect insets on duplicate rules */
+.search-morph.is-open .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after,
+.top-header.is-search-active .search-field:hover:not(.is-active):has(+ .search-field.is-active)::after,
+.search-morph.is-open .search-field.is-active + .search-field:hover:not(.is-active)::after,
+.top-header.is-search-active .search-field.is-active + .search-field:hover:not(.is-active)::after {
+  border-radius: 999px !important;
+}
+
+/* Unified premium hover backgrounds using ::after with negative insets */
+.search-morph.is-open .search-field:hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:hover:not(.is-active)::after {
+  position: absolute !important;
+  z-index: -1 !important;
+  border-radius: 999px !important;
+  background: var(--search-field-hover) !important;
+  content: "" !important;
+  pointer-events: none !important;
+  transition: background-color 220ms var(--ease-standard), opacity 180ms var(--ease-standard);
+}
+
+/* Field-specific negative insets to extend background under adjacent elements */
+.search-morph.is-open .search-field:nth-of-type(1):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(1):hover:not(.is-active)::after {
+  inset: 0 -22px 0 -20px !important;
+}
+
+.search-morph.is-open .search-field:nth-of-type(2):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(2):hover:not(.is-active)::after {
+  inset: 0 -22px !important;
+}
+
+.search-morph.is-open .search-field:nth-of-type(3):hover:not(.is-active)::after,
+.top-header.is-search-active .search-field:nth-of-type(3):hover:not(.is-active)::after {
+  inset: 0 -120px 0 -22px !important;
+}
+
+/* Search Button Hover Integration: Highlight third field too! */
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(3):not(.is-active)::after {
+  position: absolute !important;
+  inset: 0 -120px 0 -22px !important;
+  z-index: -1 !important;
+  border-radius: 999px !important;
+  background: var(--search-field-hover) !important;
+  content: "" !important;
+  pointer-events: none !important;
+}
+
+.search-pill:has(.search-button:hover) .search-field:nth-of-type(3)::before {
+  opacity: 0 !important;
+}
+
+/* ─── Scrolled Compact Header Size & Placement adjustments ────── */
+.top-header.is-scrolled {
+  min-height: 80px !important;
+}
+
+.top-header.is-scrolled .header-inner {
+  height: 80px !important;
+  min-height: 80px !important;
+}
+
+.top-header.is-scrolled .search-morph,
+.top-header.is-scrolled .search-morph.is-open {
+  top: 16px !important;
+}
+
+.top-header.is-scrolled ~ .category-bar {
+  top: 80px !important;
+}
+
+/* ─── Collapsed Scrolled Search Bar Size & Typography Fixes ─── */
+
+.top-header.is-scrolled:not(.is-search-active) .search-morph,
+.top-header.is-scrolled:not(.is-search-active) .search-morph.is-open {
+  min-width: 0 !important;
+  width: 340px !important; /* Match Airbnb compact collapsed size */
+}
+
+/* Adjust height and grid columns inside collapsed scrolled pill */
+.top-header.is-scrolled:not(.is-search-active) .search-pill,
+.top-header.is-scrolled:not(.is-search-active) .search-morph.is-open .search-pill {
+  height: 48px !important;
+  grid-template-columns: 1fr 1fr 1fr auto !important;
+}
+
+/* Disable individual field hover effects in collapsed scrolled state */
+.top-header.is-scrolled:not(.is-search-active) .search-field:hover {
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+/* Add unified hover shadow to the entire search pill in collapsed scrolled state */
+.top-header.is-scrolled:not(.is-search-active) .search-pill:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Match Airbnb compact typography for search fields (medium weight, clean grey/black) */
+.top-header.is-scrolled .compact-field-label strong,
+.top-header.is-scrolled .compact-field-labeled strong {
+  color: #222222 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important; /* Regular/Medium weight like Airbnb */
+}
+
+.top-header.is-scrolled .search-field {
+  padding: 0 8px !important;
+}
+
+.top-header.is-scrolled .search-field:first-child {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+/* Clean up dividers when collapsed scrolled */
+.top-header.is-scrolled:not(.is-search-active) .search-field+.search-field::before {
+  top: 15px !important;
+  bottom: 15px !important;
+  background: #e0e0e0 !important;
+}
+
+/* Style the brand logo and text with Airbnb Red for a cohesive clone look */
+.brand {
+  color: #FF385C !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+}
+
+.brand-mark {
+  color: #FF385C !important;
+}
+

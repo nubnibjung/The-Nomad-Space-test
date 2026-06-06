@@ -41,6 +41,8 @@ export default function DiscoveryPage() {
   const [isMapVisible, setIsMapVisible] = useState(false);
   const [resultsSection, setResultsSection] = useState<ListingSection | null>(null);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
+  const [wishlistPendingId, setWishlistPendingId] = useState<string | null>(null);
+  const [wishlistNameInput, setWishlistNameInput] = useState("");
   const {
     query, handleQueryChange,
     activeCategory, handleCategoryChange,
@@ -115,7 +117,12 @@ export default function DiscoveryPage() {
 
   function handleProtectedSave(id: string) {
     if (status === "authenticated") {
-      handleSaveToggle(id);
+      if (savedIds.has(id)) {
+        handleSaveToggle(id);
+      } else {
+        setWishlistPendingId(id);
+        setWishlistNameInput("");
+      }
       return;
     }
 
@@ -196,6 +203,53 @@ export default function DiscoveryPage() {
       )}
 
       {authPromptOpen && <AuthPromptModal onClose={() => setAuthPromptOpen(false)} />}
+
+      {wishlistPendingId && (
+        <div className="wishlist-modal-overlay" onClick={() => setWishlistPendingId(null)}>
+          <div className="wishlist-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="wishlist-modal-header">
+              <button className="wishlist-modal-back" onClick={() => setWishlistPendingId(null)} aria-label="Back">
+                <i className="bi bi-chevron-left" />
+              </button>
+              <h2>สร้าง Wishlist</h2>
+              <div style={{ width: "32px" }} />
+            </div>
+
+            <div className="wishlist-modal-body">
+              <div className="wishlist-form-group">
+                <input
+                  type="text"
+                  maxLength={50}
+                  className="wishlist-form-input"
+                  value={wishlistNameInput}
+                  onChange={(e) => setWishlistNameInput(e.target.value)}
+                  placeholder="ชื่อ"
+                  autoFocus
+                />
+                <span className="wishlist-char-count">{wishlistNameInput.length}/50 อักขระ</span>
+              </div>
+            </div>
+
+            <div className="wishlist-modal-footer">
+              <button className="wishlist-btn-text" onClick={() => setWishlistPendingId(null)}>
+                ยกเลิก
+              </button>
+              <button
+                className="wishlist-btn-submit"
+                disabled={!wishlistNameInput.trim()}
+                onClick={() => {
+                  if (wishlistNameInput.trim()) {
+                    handleSaveToggle(wishlistPendingId, wishlistNameInput.trim());
+                    setWishlistPendingId(null);
+                  }
+                }}
+              >
+                สร้าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

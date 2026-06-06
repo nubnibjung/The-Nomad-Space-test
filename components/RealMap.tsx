@@ -31,7 +31,6 @@ export default function RealMap({
   const listingsRef = useRef(listings);
   const mapRef = useRef<MapRef>(null);
   const mapReportedBoundsRef = useRef<Bounds[]>([]);
-  const isUserInteractingRef = useRef(false);
   const viewportUpdateFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -84,7 +83,6 @@ export default function RealMap({
   const handleViewportChange = useCallback((shouldUpdateBounds = true) => {
     const map = mapRef.current;
     if (!map) return;
-    if (shouldUpdateBounds && !isUserInteractingRef.current) return;
 
     const b = map.getBounds();
     if (!b) return;
@@ -135,13 +133,8 @@ export default function RealMap({
       initialViewState={INIT}
       style={{ width: "100%", height: "100%" }}
       mapStyle={isDark ? STYLE_DARK : STYLE_LIGHT}
-      onMove={() => scheduleViewportChange(true)}
-      onMoveEnd={() => {
-        handleViewportChange(true);
-        isUserInteractingRef.current = false;
-      }}
-      onDragStart={() => { isUserInteractingRef.current = true; }}
-      onZoomStart={() => { isUserInteractingRef.current = true; }}
+      onMove={(e) => scheduleViewportChange(e.originalEvent !== undefined)}
+      onMoveEnd={(e) => handleViewportChange(e.originalEvent !== undefined)}
       onLoad={() => handleViewportChange(false)}
       attributionControl={false}
     >

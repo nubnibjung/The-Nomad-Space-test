@@ -88,9 +88,10 @@ export function Header({
   ];
   const userInitial = getUserInitial(session?.user?.name ?? session?.user?.email);
   const guestSearchCount = getGuestSearchCount(guestCounts);
-  const hasCustomGuestCount = guestSearchCount > 1 || guestCounts.pets > 0;
+  const hasCustomGuestCount = guestSearchCount > 0 || guestCounts.pets > 0;
   const guestSummary = hasCustomGuestCount ? `${guestSearchCount} ${t.search.guests}` : t.search.addGuests;
-  const dateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.anytime;
+  const dateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.addDates;
+  const compactDateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.anytime;
   const rightSearchLabel = isServiceSearch ? t.search.serviceType : t.search.who;
   const rightSearchSummary = isServiceSearch ? t.search.addService : guestSummary;
   const activeField = isSearchOpen ? activeSearchStep : null;
@@ -288,7 +289,6 @@ export function Header({
                 </button>
               )}
               <span className="compact-field-label">
-                <span className="compact-field-icon" aria-hidden="true">🏠</span>
                 <strong>{query || t.search.anyWhere}</strong>
               </span>
             </label>
@@ -324,7 +324,7 @@ export function Header({
               )}
               <span className="compact-field-label compact-field-labeled">
                 <small>{t.detail.checkIn} / {t.detail.checkOut}</small>
-                <strong>{dateSummary}</strong>
+                <strong>{compactDateSummary}</strong>
               </span>
             </div>
 
@@ -776,7 +776,7 @@ function GuestSelector({
   return (
     <div className={`guest-selector${variant === "experience" ? " is-experience" : ""}`} role="dialog" aria-label={t.guests.label}>
       {rows.map((row) => {
-        const minimumCount = row.type === "adults" ? 1 : 0;
+        const minimumCount = 0;
         const count = counts[row.type];
 
         return (
