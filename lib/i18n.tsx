@@ -91,6 +91,7 @@ export const translations = {
       flexibleLabel: "ความยืดหยุ่นของวันที่",
       stayLengthTitle: "ต้องการพักนานแค่ไหน?",
       stayMonthTitle: "คุณอยากไปตอนไหน?",
+      flexibleConnector: "ใน",
       flexibleDateOptions: ["วันที่แน่นอน", "± 1 วัน", "± 2 วัน", "± 3 วัน", "± 7 วัน", "± 14 วัน"],
       stayLengths: ["สุดสัปดาห์", "สัปดาห์", "เดือน"],
       months: [
@@ -362,6 +363,7 @@ export const translations = {
       flexibleLabel: "Date flexibility",
       stayLengthTitle: "How long do you want to stay?",
       stayMonthTitle: "When do you want to go?",
+      flexibleConnector: "in",
       flexibleDateOptions: ["Exact dates", "± 1 day", "± 2 days", "± 3 days", "± 7 days", "± 14 days"],
       stayLengths: ["Weekend", "Week", "Month"],
       months: [

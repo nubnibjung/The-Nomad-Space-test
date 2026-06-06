@@ -6,7 +6,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { LanguageModal } from "./LanguageModal";
 import { LocationSuggest } from "./LocationSuggest";
 import { useLanguage } from "@/lib/i18n";
-import type { GuestCounts, GuestType } from "@/lib/types";
+import { DATE_FLEX_DAYS } from "@/lib/types";
+import type { DateRange, GuestCounts, GuestType } from "@/lib/types";
 
 type SearchStep = "where" | "when" | "who";
 type DatePickerMode = "dates" | "flexible";
@@ -16,14 +17,17 @@ const MIN_SELECTABLE_DATE = new Date(2026, 5, 4);
 type Props = {
   query: string;
   activeCategory: string;
-  selectedDate: Date | null;
+  dateRange: DateRange;
+  dateFlexIndex: number;
   guestCounts: GuestCounts;
   isSearchOpen: boolean;
   isScrolled: boolean;
   onQueryChange: (v: string) => void;
   onCategoryChange: (id: string) => void;
-  onDateChange: (date: Date | null) => void;
+  onDateChange: (range: DateRange) => void;
+  onDateFlexChange: (index: number) => void;
   onGuestChange: (type: GuestType, delta: 1 | -1) => void;
+  onGuestReset: () => void;
   onSearchOpen: (open: boolean) => void;
   onSearchReset: () => void;
   onNearby: () => void;
@@ -32,8 +36,8 @@ type Props = {
 };
 
 export function Header({
-  query, activeCategory, selectedDate, guestCounts, isSearchOpen, isScrolled,
-  onQueryChange, onCategoryChange, onDateChange, onGuestChange, onSearchOpen, onSearchReset, onNearby,
+  query, activeCategory, dateRange, dateFlexIndex, guestCounts, isSearchOpen, isScrolled,
+  onQueryChange, onCategoryChange, onDateChange, onDateFlexChange, onGuestChange, onGuestReset, onSearchOpen, onSearchReset, onNearby,
   serviceType, onServiceChange,
 }: Props) {
   const { data: session, status } = useSession();
@@ -43,7 +47,6 @@ export function Header({
   const [activeSearchStep, setActiveSearchStep] = useState<SearchStep>("where");
   const [datePickerMode, setDatePickerMode] = useState<DatePickerMode>("dates");
   const [calendarOffset, setCalendarOffset] = useState(0);
-  const [selectedDateFlexIndex, setSelectedDateFlexIndex] = useState(0);
   const [selectedStayLengthIndex, setSelectedStayLengthIndex] = useState(0);
   const [flexibleMonthOffset, setFlexibleMonthOffset] = useState(0);
   const [selectedFlexibleMonth, setSelectedFlexibleMonth] = useState(CALENDAR_START_DATE);
@@ -110,8 +113,13 @@ export function Header({
   const guestSearchCount = getGuestSearchCount(guestCounts);
   const hasCustomGuestCount = guestSearchCount > 0 || guestCounts.pets > 0;
   const guestSummary = hasCustomGuestCount ? `${guestSearchCount} ${t.search.guests}` : t.search.addGuests;
-  const dateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.addDates;
-  const compactDateSummary = selectedDate ? formatSearchDate(selectedDate, t.datePicker.shortMonths) : t.search.anytime;
+  const flexDays = DATE_FLEX_DAYS[dateFlexIndex];
+  const rangeSummary = formatSearchRange(dateRange, t.datePicker.shortMonths);
+  const rangeWithFlex = rangeSummary && flexDays > 0 ? `${rangeSummary} ±${flexDays}` : rangeSummary;
+  const flexibleSummary = `${t.datePicker.stayLengths[selectedStayLengthIndex]} ${t.datePicker.flexibleConnector} ${t.datePicker.months[selectedFlexibleMonth.getMonth()]}`;
+  const whenSummary = datePickerMode === "flexible" ? flexibleSummary : rangeWithFlex;
+  const dateSummary = whenSummary ?? t.search.addDates;
+  const compactDateSummary = whenSummary ?? t.search.anytime;
   const rightSearchLabel = isServiceSearch ? t.search.serviceType : t.search.who;
   const selectedServiceLabel = t.search.serviceOptions.find((option) => option.key === serviceType)?.label;
   const rightSearchSummary = isServiceSearch ? (selectedServiceLabel ?? t.search.addService) : guestSummary;
@@ -141,6 +149,28 @@ export function Header({
   function handleClearLocation() {
     setActiveSearchStep("where");
     onSearchReset();
+  }
+
+  function handleDateSelect(day: Date) {
+    const { start, end } = dateRange;
+
+    // Start a fresh range when nothing is chosen, a full range already exists,
+    // or the clicked day falls before the current check-in.
+    if (!start || end || day < start) {
+      onDateChange({ start: day, end: null });
+      return;
+    }
+
+    // Same day clicked twice — keep it as a single-day selection.
+    if (isSameDate(day, start)) {
+      onDateChange({ start, end: day });
+      openSearchStep("who");
+      return;
+    }
+
+    // Second click after the check-in completes the range.
+    onDateChange({ start, end: day });
+    openSearchStep("who");
   }
 
   useEffect(() => {
@@ -351,7 +381,8 @@ export function Header({
                   aria-label="ล้างวันที่"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDateChange(null);
+                    onDateChange({ start: null, end: null });
+                    setDatePickerMode("dates");
                     openSearchStep("where");
                   }}
                 >
@@ -386,6 +417,11 @@ export function Header({
                   aria-label="ล้างจำนวนเกสต์"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (isServiceSearch) {
+                      onServiceChange(null);
+                    } else {
+                      onGuestReset();
+                    }
                     openSearchStep("where");
                   }}
                 >
@@ -424,21 +460,18 @@ export function Header({
             <DatePickerPanel
               mode={datePickerMode}
               monthOffset={calendarOffset}
-              selectedDate={selectedDate}
-              selectedDateFlexIndex={selectedDateFlexIndex}
+              dateRange={dateRange}
+              selectedDateFlexIndex={dateFlexIndex}
               selectedStayLengthIndex={selectedStayLengthIndex}
               flexibleMonthOffset={flexibleMonthOffset}
               selectedFlexibleMonth={selectedFlexibleMonth}
               onModeChange={setDatePickerMode}
               onMonthChange={setCalendarOffset}
-              onDateFlexChange={setSelectedDateFlexIndex}
+              onDateFlexChange={onDateFlexChange}
               onStayLengthChange={setSelectedStayLengthIndex}
               onFlexibleMonthOffsetChange={setFlexibleMonthOffset}
               onFlexibleMonthChange={setSelectedFlexibleMonth}
-              onSelectDate={(date) => {
-                onDateChange(date);
-                openSearchStep("who");
-              }}
+              onSelectDate={handleDateSelect}
             />
           )}
 
@@ -581,7 +614,7 @@ function BootstrapIcon({ name }: { name: string }) {
 function DatePickerPanel({
   mode,
   monthOffset,
-  selectedDate,
+  dateRange,
   selectedDateFlexIndex,
   selectedStayLengthIndex,
   flexibleMonthOffset,
@@ -596,7 +629,7 @@ function DatePickerPanel({
 }: {
   mode: DatePickerMode;
   monthOffset: number;
-  selectedDate: Date | null;
+  dateRange: DateRange;
   selectedDateFlexIndex: number;
   selectedStayLengthIndex: number;
   flexibleMonthOffset: number;
@@ -647,8 +680,8 @@ function DatePickerPanel({
             >
               <i className="bi bi-chevron-left" aria-hidden="true" />
             </button>
-            <CalendarMonth monthDate={firstMonth} selectedDate={selectedDate} onSelectDate={onSelectDate} />
-            <CalendarMonth monthDate={secondMonth} selectedDate={selectedDate} onSelectDate={onSelectDate} />
+            <CalendarMonth monthDate={firstMonth} dateRange={dateRange} onSelectDate={onSelectDate} />
+            <CalendarMonth monthDate={secondMonth} dateRange={dateRange} onSelectDate={onSelectDate} />
             <button
               className="calendar-nav calendar-nav-next"
               type="button"
@@ -759,16 +792,17 @@ function FlexibleStayPanel({
 
 function CalendarMonth({
   monthDate,
-  selectedDate,
+  dateRange,
   onSelectDate,
 }: {
   monthDate: Date;
-  selectedDate: Date | null;
+  dateRange: DateRange;
   onSelectDate: (date: Date) => void;
 }) {
   const { t } = useLanguage();
   const calendarDays = buildCalendarDays(monthDate);
   const monthName = t.datePicker.months[monthDate.getMonth()];
+  const { start, end } = dateRange;
 
   return (
     <section className="calendar-month" aria-label={`${monthName} ${monthDate.getFullYear()}`}>
@@ -781,19 +815,29 @@ function CalendarMonth({
           if (!day) return <span className="calendar-empty-day" key={`empty-${index}`} />;
 
           const disabled = day < MIN_SELECTABLE_DATE;
-          const selected = Boolean(selectedDate && isSameDate(day, selectedDate));
+          const isStart = Boolean(start && isSameDate(day, start));
+          const isEnd = Boolean(end && isSameDate(day, end));
+          const inRange = Boolean(start && end && day > start && day < end);
+          const isEndpoint = isStart || isEnd;
+          const cellClass = [
+            "calendar-cell",
+            inRange ? "is-in-range" : "",
+            isStart && end && !isSameDate(start!, end) ? "is-range-start" : "",
+            isEnd && start && !isSameDate(start, end!) ? "is-range-end" : "",
+          ].filter(Boolean).join(" ");
 
           return (
-            <button
-              className={selected ? "is-selected" : ""}
-              type="button"
-              key={dateKey(day)}
-              disabled={disabled}
-              aria-pressed={selected}
-              onClick={() => onSelectDate(day)}
-            >
-              {day.getDate()}
-            </button>
+            <div className={cellClass} key={dateKey(day)}>
+              <button
+                className={isEndpoint ? "is-selected" : ""}
+                type="button"
+                disabled={disabled}
+                aria-pressed={isEndpoint}
+                onClick={() => onSelectDate(day)}
+              >
+                {day.getDate()}
+              </button>
+            </div>
           );
         })}
       </div>
@@ -910,6 +954,16 @@ function isSameDate(firstDate: Date, secondDate: Date) {
 
 function formatSearchDate(date: Date, shortMonths: readonly string[]) {
   return `${date.getDate()} ${shortMonths[date.getMonth()]}`;
+}
+
+function formatSearchRange(range: DateRange, shortMonths: readonly string[]) {
+  const { start, end } = range;
+  if (!start) return null;
+  if (!end || isSameDate(start, end)) return formatSearchDate(start, shortMonths);
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+    return `${start.getDate()} – ${formatSearchDate(end, shortMonths)}`;
+  }
+  return `${formatSearchDate(start, shortMonths)} – ${formatSearchDate(end, shortMonths)}`;
 }
 
 function getUserInitial(value: string | null | undefined) {

@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { searchListings } from "@/lib/search";
 import { LISTINGS, localSearch, normalizeSearchQuery } from "@/lib/data";
-import { DEFAULT_FILTERS, INITIAL_BOUNDS } from "@/lib/types";
-import type { Bounds, Filters, GuestCounts, GuestType, Listing, SearchCriteria, SortOption, ViewMode } from "@/lib/types";
+import { DATE_FLEX_DAYS, DEFAULT_FILTERS, INITIAL_BOUNDS } from "@/lib/types";
+import type { Bounds, DateRange, Filters, GuestCounts, GuestType, Listing, SearchCriteria, SortOption, ViewMode } from "@/lib/types";
 
 type SearchResetOptions = {
   keepSearchOpen?: boolean;
@@ -33,7 +33,8 @@ export function useDiscovery() {
   const [bounds, setBounds] = useState<Bounds>(INITIAL_BOUNDS);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({ start: null, end: null });
+  const [dateFlexIndex, setDateFlexIndex] = useState(0);
   const [guestCounts, setGuestCounts] = useState<GuestCounts>(INITIAL_GUEST_COUNTS);
   const [autoSearch, setAutoSearch] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -50,10 +51,14 @@ export function useDiscovery() {
 
   const requestIdRef = useRef(0);
   const topIdleTimerRef = useRef<number | null>(null);
-  const selectedDateKey = selectedDate ? toDateKey(selectedDate) : null;
+  const selectedDateKey = dateRange.start ? toDateKey(dateRange.start) : null;
+  const dateFlexDays = DATE_FLEX_DAYS[dateFlexIndex];
   const searchCriteria = useMemo<SearchCriteria>(
-    () => ({ dateKey: selectedDateKey, guests: guestCounts }),
-    [guestCounts, selectedDateKey],
+    () => ({
+      dateKeys: selectedDateKey ? buildFlexDateKeys(selectedDateKey, dateFlexDays) : null,
+      guests: guestCounts,
+    }),
+    [guestCounts, selectedDateKey, dateFlexDays],
   );
 
   // Debounce query
@@ -178,7 +183,8 @@ export function useDiscovery() {
     setBounds(INITIAL_BOUNDS);
     setFilters(DEFAULT_FILTERS);
     setSortBy("default");
-    setSelectedDate(null);
+    setDateRange({ start: null, end: null });
+    setDateFlexIndex(0);
     setGuestCounts(INITIAL_GUEST_COUNTS);
     setSelectedId(null);
     setAutoSearch(false);
@@ -186,13 +192,15 @@ export function useDiscovery() {
     setIsFilterOpen(false);
     window.scrollTo({ top: 0 });
   }
-  function handleDateChange(date: Date | null) { setSelectedDate(date); }
+  function handleDateChange(range: DateRange) { setDateRange(range); }
+  function handleDateFlexChange(index: number) { setDateFlexIndex(index); }
   function handleGuestChange(type: GuestType, delta: 1 | -1) {
     setGuestCounts((current) => ({
       ...current,
       [type]: Math.max(MIN_GUEST_COUNTS[type], current[type] + delta),
     }));
   }
+  function handleGuestReset() { setGuestCounts(INITIAL_GUEST_COUNTS); }
   function handleSortChange(s: SortOption) { setSortBy(s); }
   function handleFiltersApply(f: Filters) { setFilters(f); setIsFilterOpen(false); }
   function handleSearchReset(options: SearchResetOptions = {}) {
@@ -202,7 +210,8 @@ export function useDiscovery() {
     setBounds(INITIAL_BOUNDS);
     setFilters(DEFAULT_FILTERS);
     setSortBy("default");
-    setSelectedDate(null);
+    setDateRange({ start: null, end: null });
+    setDateFlexIndex(0);
     setGuestCounts(INITIAL_GUEST_COUNTS);
     setSelectedId(null);
     setAutoSearch(false);
@@ -236,8 +245,9 @@ export function useDiscovery() {
   return {
     query, handleQueryChange,
     activeCategory, handleCategoryChange,
-    selectedDate, handleDateChange,
-    guestCounts, handleGuestChange,
+    dateRange, handleDateChange,
+    dateFlexIndex, handleDateFlexChange,
+    guestCounts, handleGuestChange, handleGuestReset,
     bounds, handleBoundsChange,
     filters, handleFiltersApply, activeFilterCount,
     sortBy, handleSortChange,
@@ -272,6 +282,16 @@ function toDateKey(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+// Expand a check-in date key into the set of acceptable days within ±flexDays.
+function buildFlexDateKeys(startKey: string, flexDays: number) {
+  const [year, month, day] = startKey.split("-").map(Number);
+  const keys: string[] = [];
+  for (let offset = -flexDays; offset <= flexDays; offset++) {
+    keys.push(toDateKey(new Date(year, month - 1, day + offset)));
+  }
+  return keys;
 }
 
 async function searchListingsInBounds(

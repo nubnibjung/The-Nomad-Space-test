@@ -36,10 +36,19 @@ export type GuestType = "adults" | "children" | "infants" | "pets";
 
 export type GuestCounts = Record<GuestType, number>;
 
+export type DateRange = {
+  start: Date | null;
+  end: Date | null;
+};
+
 export type SearchCriteria = {
-  dateKey: string | null;
+  // Acceptable check-in dates — a single day, or a ± flexibility window.
+  dateKeys: string[] | null;
   guests: GuestCounts;
 };
+
+// "Exact dates" plus the ± day offsets offered in the date picker.
+export const DATE_FLEX_DAYS = [0, 1, 2, 3, 7, 14] as const;
 
 export type Filters = {
   priceMin: number;

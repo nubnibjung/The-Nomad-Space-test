@@ -47,8 +47,9 @@ export default function DiscoveryPage() {
   const {
     query, handleQueryChange,
     activeCategory, handleCategoryChange,
-    selectedDate, handleDateChange,
-    guestCounts, handleGuestChange,
+    dateRange, handleDateChange,
+    dateFlexIndex, handleDateFlexChange,
+    guestCounts, handleGuestChange, handleGuestReset,
     bounds, handleBoundsChange,
     filters, handleFiltersApply,
     handleSearchReset,
@@ -137,7 +138,8 @@ export default function DiscoveryPage() {
       <Header
         query={query}
         activeCategory={activeCategory}
-        selectedDate={selectedDate}
+        dateRange={dateRange}
+        dateFlexIndex={dateFlexIndex}
         guestCounts={guestCounts}
         isSearchOpen={isSearchOpen}
         isScrolled={isScrolled}
@@ -148,7 +150,9 @@ export default function DiscoveryPage() {
           handleCategoryChange(id);
         }}
         onDateChange={handleDateChange}
+        onDateFlexChange={handleDateFlexChange}
         onGuestChange={handleGuestChange}
+        onGuestReset={handleGuestReset}
         onSearchOpen={setIsSearchOpen}
         onSearchReset={() => handleSearchReset({ keepSearchOpen: true })}
         onNearby={handleNearby}

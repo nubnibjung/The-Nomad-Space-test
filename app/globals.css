@@ -2499,6 +2499,36 @@ input:focus-visible {
   cursor: not-allowed;
 }
 
+.calendar-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.calendar-cell.is-in-range::before,
+.calendar-cell.is-range-start::before,
+.calendar-cell.is-range-end::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #f0f0f0;
+  z-index: 0;
+}
+
+.calendar-cell.is-range-start::before {
+  left: 50%;
+}
+
+.calendar-cell.is-range-end::before {
+  right: 50%;
+}
+
+.calendar-cell button {
+  position: relative;
+  z-index: 1;
+}
+
 .flexible-date-options {
   display: flex;
   flex-wrap: wrap;
@@ -2919,6 +2949,12 @@ input:focus-visible {
 [data-theme="dark"] .calendar-grid button.is-selected {
   background: #f0f0f0;
   color: #111111;
+}
+
+[data-theme="dark"] .calendar-cell.is-in-range::before,
+[data-theme="dark"] .calendar-cell.is-range-start::before,
+[data-theme="dark"] .calendar-cell.is-range-end::before {
+  background: #2b2b2b;
 }
 
 [data-theme="dark"] .flexible-date-options button {

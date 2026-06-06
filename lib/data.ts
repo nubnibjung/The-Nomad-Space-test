@@ -739,7 +739,7 @@ export function localSearch(
     if (l.rating < filters.minRating) return false;
     if (requiredGuests > 0 && l.maxGuests < requiredGuests) return false;
     if (criteria?.guests.pets && !l.allowsPets) return false;
-    if (criteria?.dateKey && !l.availableDateKeys.includes(criteria.dateKey)) return false;
+    if (criteria?.dateKeys && !criteria.dateKeys.some((key) => l.availableDateKeys.includes(key))) return false;
     return true;
   });
 
