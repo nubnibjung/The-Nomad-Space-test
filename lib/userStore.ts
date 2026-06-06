@@ -12,9 +12,10 @@ export type StoredUser = {
   email: string;
   passwordHash: string;
   createdAt: string;
+  image?: string;
 };
 
-type PublicUser = Pick<StoredUser, "id" | "name" | "email">;
+type PublicUser = Pick<StoredUser, "id" | "name" | "email" | "image">;
 
 export async function createUser(input: { name: string; email: string; password: string }): Promise<PublicUser> {
   const users = await readUsers();
@@ -51,8 +52,33 @@ function toPublicUser(user: StoredUser): PublicUser {
     id: user.id,
     name: user.name,
     email: user.email,
+    image: user.image,
   };
 }
+
+export async function updateUser(id: string, input: { name?: string; image?: string }): Promise<PublicUser> {
+  const users = await readUsers();
+  const index = users.findIndex((user) => user.id === id);
+  if (index === -1) {
+    throw new Error("USER_NOT_FOUND");
+  }
+
+  const updatedUser = {
+    ...users[index],
+    name: input.name !== undefined ? input.name.trim() : users[index].name,
+    image: input.image !== undefined ? input.image : users[index].image,
+  };
+
+  users[index] = updatedUser;
+  await writeUsers(users);
+  return toPublicUser(updatedUser);
+}
+
+export async function getUserById(id: string): Promise<StoredUser | null> {
+  const users = await readUsers();
+  return users.find((user) => user.id === id) ?? null;
+}
+
 
 async function readUsers(): Promise<StoredUser[]> {
   try {

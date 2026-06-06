@@ -28,11 +28,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.picture = (user as any).image ? `/api/profile/image?id=${user.id}` : null;
+      }
+      if (trigger === "update" && session) {
+        if (session.name !== undefined) token.name = session.name;
+        if (session.image !== undefined) {
+          token.picture = session.image ? `/api/profile/image?id=${token.sub}&t=${Date.now()}` : null;
+        }
       }
       return token;
     },
@@ -40,6 +47,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (token.sub) session.user.id = token.sub;
       if (token.name) session.user.name = token.name;
       if (token.email) session.user.email = token.email;
+      if (token.picture) session.user.image = token.picture;
       return session;
     },
   },

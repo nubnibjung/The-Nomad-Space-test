@@ -38,7 +38,7 @@ export default function DiscoveryPage() {
     if (storedName) window.sessionStorage.removeItem("nomad-welcome-name");
     return storedName ?? "";
   });
-  const [isMapVisible, setIsMapVisible] = useState(true);
+  const [isMapVisible, setIsMapVisible] = useState(false);
   const [resultsSection, setResultsSection] = useState<ListingSection | null>(null);
   const [authPromptOpen, setAuthPromptOpen] = useState(false);
   const {
@@ -179,7 +179,10 @@ export default function DiscoveryPage() {
               router.push(`/listings/${listing.id}`);
             }}
             onBoundsChange={handleBoundsChange}
-            onHide={() => setIsMapVisible(false)}
+            onHide={() => {
+              setIsMapVisible(false);
+              handleSearchReset();
+            }}
           />
         )}
       </section>
