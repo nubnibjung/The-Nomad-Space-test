@@ -70,36 +70,57 @@ export function Header({
   }, [activeCategory]);
 
   useLayoutEffect(() => {
-    const pill = pillRef.current;
-    if (!pill) return;
+  const pill = pillRef.current;
+  if (!pill) return;
 
-    let resizeObserver: ResizeObserver | null = null;
+  let resizeObserver: ResizeObserver | null = null;
 
-    function measureActiveField() {
-      const activeFieldEl = pill?.querySelector<HTMLElement>(".search-field.is-active");
-      setHighlightStyle(
-        activeFieldEl ? { left: activeFieldEl.offsetLeft, width: activeFieldEl.offsetWidth } : null,
-      );
+  function measureActiveField() {
+    const pillEl = pillRef.current;
+    if (!pillEl) return;
+
+    const activeFieldEl = pillEl.querySelector<HTMLElement>(".search-field.is-active");
+
+    if (!activeFieldEl) {
+      setHighlightStyle(null);
+      return;
     }
 
-    measureActiveField();
+    const pillRect = pillEl.getBoundingClientRect();
+    const activeRect = activeFieldEl.getBoundingClientRect();
+    const left = activeRect.left - pillRect.left;
+    const width = activeSearchStep === "who" ? pillRect.width - left : activeRect.width;
 
-    const fields = pill.querySelectorAll(".search-field");
-    if (typeof window !== "undefined" && "ResizeObserver" in window) {
-      resizeObserver = new ResizeObserver(() => {
-        measureActiveField();
-      });
-      fields.forEach((field) => resizeObserver?.observe(field));
+    setHighlightStyle({ left, width });
+  }
+
+  measureActiveField();
+
+  const fields = pill.querySelectorAll(".search-field");
+  const searchButton = pill.querySelector(".search-button");
+
+  if (typeof window !== "undefined" && "ResizeObserver" in window) {
+    resizeObserver = new ResizeObserver(() => {
+      measureActiveField();
+    });
+
+    fields.forEach((field) => resizeObserver?.observe(field));
+
+    if (searchButton) {
+      resizeObserver.observe(searchButton);
     }
+  }
 
-    window.addEventListener("resize", measureActiveField);
-    return () => {
-      window.removeEventListener("resize", measureActiveField);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-    };
-  }, [isSearchOpen, activeSearchStep, activeCategory, isScrolled]);
+  window.addEventListener("resize", measureActiveField);
+
+  return () => {
+    window.removeEventListener("resize", measureActiveField);
+
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+    }
+  };
+}, [isSearchOpen, activeSearchStep, activeCategory, isScrolled]);
 
   const isExperienceSearch = activeCategory === "loft";
   const isServiceSearch = activeCategory === "coffee";
@@ -306,7 +327,7 @@ export function Header({
         </nav>
 
         <div className={`search-morph${isSearchOpen ? " is-open" : ""}`} ref={searchRef}>
-          <div className="search-pill" role="search" ref={pillRef}>
+         <div className="search-pill" role="search" ref={pillRef}>
             {isSearchOpen && highlightStyle && (
               <span
                 className="search-field-highlight"
@@ -444,7 +465,7 @@ export function Header({
               <span className="expanded-search-label">{t.search.submit}</span>
             </button>
           </div>
-
+              
           {isSearchOpen && activeSearchStep === "where" && (
             <div className="location-suggest-wrapper">
               <LocationSuggest
