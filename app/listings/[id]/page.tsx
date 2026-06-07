@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
-import { useState, useEffect, type FormEvent, type ReactNode } from "react";
-import { Header } from "@/components/Header";
+import { useState, useEffect, useRef, type FormEvent, type ReactNode } from "react";
+import { GuestMenu, UserMenu } from "@/components/Header";
+import { LanguageModal } from "@/components/LanguageModal";
 import { LISTINGS } from "@/lib/data";
 import { getReviewsForListing } from "@/lib/reviews";
 import { useLanguage } from "@/lib/i18n";
@@ -431,6 +432,23 @@ export default function ListingDetailPage() {
 }
 
 function DetailHeader({ isHidden }: { isHidden: boolean }) {
+  const { data: session } = useSession();
+  const { t } = useLanguage();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   return (
     <header className={`detail-top-header${isHidden ? " is-hidden" : ""}`}>
       <Link className="detail-top-brand" href="/">
@@ -462,13 +480,43 @@ function DetailHeader({ isHidden }: { isHidden: boolean }) {
       </Link>
 
       <div className="detail-top-actions">
-        <Link href="/auth" className="detail-top-host">มาเป็นโฮสต์กัน</Link>
-        <button className="detail-top-icon" type="button" aria-label="เมนู">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <path d="M3 12h18M3 6h18M3 18h18"/>
-          </svg>
-        </button>
+        <Link href="/auth" className="detail-top-host">{session ? t.nav.hostMode : t.nav.host}</Link>
+        <div className="auth-menu" ref={menuRef}>
+          <button
+            className="detail-top-icon"
+            type="button"
+            aria-label={session ? t.nav.accountMenu : t.nav.signIn}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((value) => !value)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+              <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+          </button>
+
+          {menuOpen && (
+            <div className="auth-dropdown" role="menu">
+              {session ? (
+                <UserMenu
+                  onClose={() => setMenuOpen(false)}
+                  onLanguageOpen={() => {
+                    setMenuOpen(false);
+                    setLanguageOpen(true);
+                  }}
+                  onSignOut={() => {
+                    setMenuOpen(false);
+                    signOut();
+                  }}
+                />
+              ) : (
+                <GuestMenu onClose={() => setMenuOpen(false)} />
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {languageOpen && <LanguageModal onClose={() => setLanguageOpen(false)} />}
     </header>
   );
 }

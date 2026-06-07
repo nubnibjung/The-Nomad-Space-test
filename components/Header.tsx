@@ -13,7 +13,12 @@ type SearchStep = "where" | "when" | "who";
 type DatePickerMode = "dates" | "flexible";
 
 const CALENDAR_START_DATE = new Date(2026, 5, 1);
-const MIN_SELECTABLE_DATE = new Date(2026, 5, 4);
+// Earliest bookable day is today — past dates are disabled.
+const MIN_SELECTABLE_DATE = (() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+})();
 type Props = {
   query: string;
   activeCategory: string;
@@ -239,6 +244,11 @@ export function Header({
 
     // Second click after the check-in completes the range.
     onDateChange({ start, end: day });
+    openSearchStep("who");
+  }
+
+  function handleQuickDate(start: Date, end: Date) {
+    onDateChange({ start, end });
     openSearchStep("who");
   }
 
@@ -572,22 +582,32 @@ export function Header({
           )}
 
           {isSearchOpen && activeSearchStep === "when" && (
-            <DatePickerPanel
-              mode={datePickerMode}
-              monthOffset={calendarOffset}
-              dateRange={dateRange}
-              selectedDateFlexIndex={dateFlexIndex}
-              selectedStayLengthIndex={selectedStayLengthIndex}
-              flexibleMonthOffset={flexibleMonthOffset}
-              selectedFlexibleMonth={selectedFlexibleMonth}
-              onModeChange={setDatePickerMode}
-              onMonthChange={setCalendarOffset}
-              onDateFlexChange={onDateFlexChange}
-              onStayLengthChange={setSelectedStayLengthIndex}
-              onFlexibleMonthOffsetChange={setFlexibleMonthOffset}
-              onFlexibleMonthChange={setSelectedFlexibleMonth}
-              onSelectDate={handleDateSelect}
-            />
+            isExperienceSearch ? (
+              <ExperienceDatePanel
+                monthOffset={calendarOffset}
+                dateRange={dateRange}
+                onMonthChange={setCalendarOffset}
+                onSelectDate={handleDateSelect}
+                onSelectQuick={handleQuickDate}
+              />
+            ) : (
+              <DatePickerPanel
+                mode={datePickerMode}
+                monthOffset={calendarOffset}
+                dateRange={dateRange}
+                selectedDateFlexIndex={dateFlexIndex}
+                selectedStayLengthIndex={selectedStayLengthIndex}
+                flexibleMonthOffset={flexibleMonthOffset}
+                selectedFlexibleMonth={selectedFlexibleMonth}
+                onModeChange={setDatePickerMode}
+                onMonthChange={setCalendarOffset}
+                onDateFlexChange={onDateFlexChange}
+                onStayLengthChange={setSelectedStayLengthIndex}
+                onFlexibleMonthOffsetChange={setFlexibleMonthOffset}
+                onFlexibleMonthChange={setSelectedFlexibleMonth}
+                onSelectDate={handleDateSelect}
+              />
+            )
           )}
 
           {isSearchOpen &&
@@ -624,7 +644,7 @@ export function Header({
   );
 }
 
-function GuestMenu({ onClose }: { onClose: () => void }) {
+export function GuestMenu({ onClose }: { onClose: () => void }) {
   const { t } = useLanguage();
 
   return (
@@ -662,7 +682,7 @@ function GuestMenu({ onClose }: { onClose: () => void }) {
   );
 }
 
-function UserMenu({
+export function UserMenu({
   onClose,
   onLanguageOpen,
   onSignOut,
@@ -1058,6 +1078,82 @@ function CalendarMonth({
   );
 }
 
+function ExperienceDatePanel({
+  monthOffset,
+  dateRange,
+  onMonthChange,
+  onSelectDate,
+  onSelectQuick,
+}: {
+  monthOffset: number;
+  dateRange: DateRange;
+  onMonthChange: (nextOffset: number) => void;
+  onSelectDate: (date: Date) => void;
+  onSelectQuick: (start: Date, end: Date) => void;
+}) {
+  const { t } = useLanguage();
+  const month = addMonths(CALENDAR_START_DATE, monthOffset);
+  const today = startOfToday();
+  const tomorrow = addDays(today, 1);
+  const weekend = getNextWeekend(today);
+  const { start, end } = dateRange;
+
+  const quickOptions = [
+    { key: "today", label: t.datePicker.today, start: today, end: today },
+    { key: "tomorrow", label: t.datePicker.tomorrow, start: tomorrow, end: tomorrow },
+    { key: "weekend", label: t.datePicker.nextWeekend, start: weekend.start, end: weekend.end },
+  ];
+
+  return (
+    <div className="date-picker-panel is-experience" role="dialog" aria-label={t.datePicker.label}>
+      <div className="experience-date-shortcuts">
+        {quickOptions.map((option) => {
+          const isActive =
+            Boolean(start && end) &&
+            isSameDate(start!, option.start) &&
+            isSameDate(end!, option.end);
+          const sub =
+            formatSearchRange({ start: option.start, end: option.end }, t.datePicker.shortMonths) ?? "";
+
+          return (
+            <button
+              key={option.key}
+              type="button"
+              className={isActive ? "is-active" : ""}
+              aria-pressed={isActive}
+              onClick={() => onSelectQuick(option.start, option.end)}
+            >
+              <strong>{option.label}</strong>
+              <span>{sub}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="experience-calendar-shell">
+        <button
+          className="calendar-nav calendar-nav-prev"
+          type="button"
+          aria-label={t.datePicker.prevMonth}
+          disabled={monthOffset === 0}
+          onClick={() => onMonthChange(Math.max(0, monthOffset - 1))}
+        >
+          <i className="bi bi-chevron-left" aria-hidden="true" />
+        </button>
+        <button
+          className="calendar-nav calendar-nav-next"
+          type="button"
+          aria-label={t.datePicker.nextMonth}
+          onClick={() => onMonthChange(monthOffset + 1)}
+        >
+          <i className="bi bi-chevron-right" aria-hidden="true" />
+        </button>
+        <CalendarMonth monthDate={month} dateRange={dateRange} onSelectDate={onSelectDate} />
+      </div>
+    </div>
+  );
+}
+
 function GuestSelector({
   counts,
   onChange,
@@ -1149,6 +1245,23 @@ function ServiceSelector({
 
 function addMonths(date: Date, months: number) {
   return new Date(date.getFullYear(), date.getMonth() + months, 1);
+}
+
+function startOfToday() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function addDays(date: Date, days: number) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+// Friday–Sunday of the coming weekend, starting from today.
+function getNextWeekend(from: Date) {
+  const daysUntilFriday = (5 - from.getDay() + 7) % 7;
+  const start = addDays(from, daysUntilFriday);
+  return { start, end: addDays(start, 2) };
 }
 
 function buildCalendarDays(monthDate: Date) {

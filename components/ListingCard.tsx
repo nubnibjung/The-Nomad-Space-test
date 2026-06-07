@@ -56,6 +56,7 @@ export function ListingCard({
       onMouseEnter={() => onHover(listing.id)}
       onMouseLeave={() => onHover(null)}
     >
+      <div className="card-media-wrap">
       {/* Image carousel */}
       <button className="card-media" onClick={() => onSelect(listing)} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} type="button">
         <div
@@ -103,6 +104,7 @@ export function ListingCard({
         {listing.images.map((src, i) => (
           <span key={src} className={i === imageIndex ? "is-active" : ""}/>
         ))}
+      </div>
       </div>
 
       {/* Info */}

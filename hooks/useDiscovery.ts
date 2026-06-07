@@ -204,9 +204,9 @@ export function useDiscovery() {
   function handleSortChange(s: SortOption) { setSortBy(s); }
   function handleFiltersApply(f: Filters) { setFilters(f); setIsFilterOpen(false); }
   function handleSearchReset(options: SearchResetOptions = {}) {
+    // Clear the search inputs but stay on the current category/tab.
     setQuery("");
     setDebouncedQuery("");
-    setActiveCategory("all");
     setBounds(INITIAL_BOUNDS);
     setFilters(DEFAULT_FILTERS);
     setSortBy("default");
@@ -285,11 +285,14 @@ function toDateKey(date: Date) {
 }
 
 // Expand a check-in date key into the set of acceptable days within ±flexDays.
+// Days before today are dropped so flexibility never searches past dates.
 function buildFlexDateKeys(startKey: string, flexDays: number) {
   const [year, month, day] = startKey.split("-").map(Number);
+  const todayKey = toDateKey(new Date());
   const keys: string[] = [];
   for (let offset = -flexDays; offset <= flexDays; offset++) {
-    keys.push(toDateKey(new Date(year, month - 1, day + offset)));
+    const key = toDateKey(new Date(year, month - 1, day + offset));
+    if (key >= todayKey) keys.push(key);
   }
   return keys;
 }

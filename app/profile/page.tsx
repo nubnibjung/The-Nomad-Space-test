@@ -106,16 +106,18 @@ export default function ProfilePage() {
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      setErrorMsg(locale === "th" ? "กรุณากรอกชื่อ" : "Name is required");
-      return;
-    }
-
     setErrorMsg("");
     setSuccessMsg("");
 
-    const currentImage = session?.user?.image || "";
-    const nextImage = hasChangedImage && selectedImage.trim() ? selectedImage : currentImage;
+    // Empty name falls back to the existing one (the input already shows it as
+    // a placeholder), so saving never wipes the profile name.
+    const nextName = name.trim() || session?.user?.name || "";
+
+    // Only send an image when the user actually picked a new one. Otherwise we
+    // omit it so the server keeps the current avatar — `session.user.image` is
+    // a proxy URL (/api/profile/image?...), not the real source, so re-sending
+    // it would overwrite the stored data URI with an unusable value.
+    const nextImage = hasChangedImage && selectedImage.trim() ? selectedImage : undefined;
 
     startTransition(async () => {
       try {
@@ -125,8 +127,8 @@ export default function ProfilePage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: name.trim(),
-            image: nextImage,
+            name: nextName,
+            ...(nextImage !== undefined ? { image: nextImage } : {}),
           }),
         });
 
@@ -137,8 +139,8 @@ export default function ProfilePage() {
         }
 
         await update({
-          name: name.trim(),
-          image: nextImage,
+          name: nextName,
+          ...(nextImage !== undefined ? { image: nextImage } : {}),
         });
 
         setSuccessMsg(locale === "th" ? "บันทึกโปรไฟล์เรียบร้อยแล้ว!" : "Profile saved successfully!");
@@ -291,7 +293,7 @@ export default function ProfilePage() {
                   className="profile-form-input"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder={t.auth.namePlaceholder}
+                  placeholder={session?.user?.name || t.auth.namePlaceholder}
                   disabled={isPending}
                 />
               </div>

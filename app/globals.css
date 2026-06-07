@@ -1052,6 +1052,12 @@ input:focus-visible {
   transform: translateY(-2px);
 }
 
+/* Positioning context sized to the image so overlays (heart, arrows, dots)
+   center on the photo, not the whole card. */
+.card-media-wrap {
+  position: relative;
+}
+
 .card-media,
 .card-copy {
   width: 100%;
@@ -3489,6 +3495,8 @@ input:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  white-space: nowrap;
   height: 42px;
   border: 0;
   border-radius: 999px;
@@ -5324,53 +5332,7 @@ input:focus-visible {
   place-items: center;
   overflow: hidden;
   padding: 120px 24px;
-  background: #f5f5f5;
-}
-
-.auth-poster-grid {
-  position: absolute;
-  inset: -90px -80px;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(220px, 1fr));
-  gap: 36px;
-  transform: rotate(-1deg);
-}
-
-.auth-poster-grid::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(2px);
-}
-
-.auth-poster-grid span {
-  display: grid;
-  min-height: 230px;
-  place-items: center;
-  border-radius: 18px;
-  color: rgba(17, 17, 17, 0.82);
-  font-size: clamp(34px, 4vw, 68px);
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
-}
-
-.auth-poster-grid span:nth-child(4n + 1) {
-  background: #d9ebe1;
-}
-
-.auth-poster-grid span:nth-child(4n + 2) {
-  background: #f2d8c4;
-}
-
-.auth-poster-grid span:nth-child(4n + 3) {
-  background: #c9deea;
-}
-
-.auth-poster-grid span:nth-child(4n) {
-  background: #eadf9e;
+  background: #ffffff;
 }
 
 .auth-panel {
@@ -5496,9 +5458,6 @@ input:focus-visible {
     padding: 96px 16px;
   }
 
-  .auth-poster-grid {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
-  }
 
   .auth-panel {
     border-radius: 22px;

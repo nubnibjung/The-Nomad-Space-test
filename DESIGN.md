@@ -2,230 +2,153 @@
 
 ## 1. ภาพรวมของโปรเจกต์
 
-โปรเจกต์ **The Nomad Space** เป็นเว็บสำหรับค้นหาที่พัก ลอฟต์ และบริการที่เหมาะกับ developer, digital nomad หรือคนที่ต้องการพื้นที่ทำงาน/พักผ่อนในกรุงเทพฯ
+The Nomad Space เป็นเว็บค้นหาที่พัก ลอฟต์ เอ็กซ์พีเรียนซ์ และบริการต่าง ๆ สำหรับ developer, digital nomad และคนที่มองหาพื้นที่ทำงาน/พักผ่อนในไทย โดยตั้งใจให้หน้า discovery ใช้งานง่ายและให้ฟีลใกล้เคียงกับ Airbnb
 
-แนวคิดหลักของงานนี้คือการทำหน้า discovery ให้ใช้งานง่าย ดูทันสมัย และให้ประสบการณ์ใกล้เคียงกับแพลตฟอร์มอย่าง Airbnb โดยเน้นส่วนสำคัญ เช่น navbar, search bar, listing card, wishlist, map view, filter และ animation ต่าง ๆ
+เป้าหมายของงานคือทำ flow การค้นหาให้ครบและลื่น ตั้งแต่ navbar, search bar, การเลือกหมวดหมู่, listing card, wishlist, แผนที่, ตัวกรอง ไปจนถึง animation ต่าง ๆ ให้ออกมาดูเรียบและทันสมัย
 
-ในเวอร์ชันนี้ ระบบหลักที่ทำเสร็จแล้วคือ flow สำหรับค้นหา เลือกหมวดหมู่ ดูรายการที่พักหรือบริการ กดบันทึก wishlist และดูข้อมูลร่วมกับ map ได้
+เวอร์ชันนี้ไม่ได้หยุดแค่ prototype หน้าเดียว แต่ต่อ backend จริงเข้ามาด้วย คือมีระบบค้นหาด้วย Meilisearch, แผนที่จริงด้วย MapLibre, ระบบล็อกอินด้วย NextAuth และ wishlist ที่เก็บลง Postgres
 
----
+## 2. Stack ที่ใช้
 
-## 2. สิ่งที่พัฒนาแล้ว
+| ส่วน | เทคโนโลยี |
+|---|---|
+| Framework | Next.js 16 (App Router, Turbopack) |
+| UI | React 19, TypeScript, Tailwind CSS v4 |
+| ค้นหา | Meilisearch (มี local fallback) |
+| แผนที่ | MapLibre GL ผ่าน react-map-gl + tile จาก OpenFreeMap |
+| ล็อกอิน | NextAuth (Credentials, session แบบ JWT) |
+| ฐานข้อมูล | Postgres (`pg`) สำหรับ wishlist + ไฟล์ JSON สำหรับ user |
+| ไอคอน | Bootstrap Icons |
 
-ฟีเจอร์หลักที่ทำไว้ในโปรเจกต์นี้มีดังนี้
+Meilisearch กับ Postgres รันผ่าน Docker (`docker compose up`) แล้ว seed ข้อมูล listing เข้า Meilisearch ด้วย `npm run db:seed`
 
-* Header แบบ fixed/sticky ที่เปลี่ยนขนาดเมื่อ scroll
-* Search bar ที่เปลี่ยนสถานะได้ระหว่างแบบ compact และ expanded
-* Search bar มี field สำหรับสถานที่ วันที่ และจำนวนแขก
-* Category tab สำหรับแยกประเภท เช่น ที่พัก เอ็กซ์พีเรียนซ์ และบริการ
-* Listing card พร้อมรูปภาพ ราคา rating และปุ่ม wishlist
-* Image carousel ภายใน card
-* ปุ่มหัวใจสำหรับบันทึกรายการ
-* หน้า Wishlist สำหรับแสดงรายการที่ผู้ใช้บันทึกไว้
-* Map view สำหรับแสดงตำแหน่งของ listing
-* การ sync ระหว่าง card กับ marker บน map เมื่อ hover หรือเลือก item
-* Filter modal
-* Skeleton loading เพื่อลด layout shift
-* Empty state เมื่อไม่พบข้อมูล
-* รองรับ reduced motion สำหรับผู้ใช้ที่ไม่ต้องการ animation เยอะ
+## 3. สิ่งที่พัฒนาแล้ว
 
----
+- Header แบบ sticky ที่หุบเล็กลงเมื่อ scroll
+- Search bar ที่เปลี่ยนสถานะระหว่าง compact / expanded และมี field สถานที่ วันที่ จำนวนแขก
+- Category tab แยกเป็น ที่พัก / เอ็กซ์พีเรียนซ์ / บริการ
+- Listing card พร้อม image carousel, ราคา, rating และปุ่มหัวใจ
+- หน้า Wishlist ที่ดึงรายการที่บันทึกไว้จากฐานข้อมูลจริง (ต้องล็อกอินก่อน)
+- แผนที่จริงด้วย MapLibre แสดง marker ราคาของแต่ละ listing
+- การ sync ระหว่าง card กับ marker บนแผนที่ตอน hover หรือเลือก
+- ระบบล็อกอิน/สมัครสมาชิก และหน้าโปรไฟล์ (แก้ชื่อ + รูปโปรไฟล์)
+- รองรับสองภาษา ไทย/อังกฤษ
+- Filter modal, skeleton loading, empty state
+- ปฏิทินที่จองได้ตั้งแต่วันนี้เป็นต้นไป (เลือกวันย้อนหลังไม่ได้)
+- รองรับ `prefers-reduced-motion`
 
-## 3. แนวคิดด้าน UI Design
+## 4. แนวคิดด้าน UI
 
-UI ของโปรเจกต์นี้เน้นความเรียบง่าย ใช้พื้นที่ว่างเยอะ และให้ผู้ใช้เข้าใจได้ทันทีว่าต้องค้นหาอะไรจากตรงไหน
+UI เน้นเรียบ ใช้พื้นที่ว่างเยอะ และคุมโทนสีให้อยู่ในกลุ่มขาว–เทา–ดำ เพื่อให้ดูเป็น modern travel platform และให้ผู้ใช้โฟกัสที่รูปและข้อมูลของแต่ละที่พัก
 
-Header ถูกออกแบบให้ใหญ่ตอนอยู่บนสุด เพื่อให้ search bar เด่นและใช้งานง่าย แต่เมื่อผู้ใช้ scroll ลงมา header จะหุบลงให้เล็กลง เพื่อคืนพื้นที่ให้กับเนื้อหาหลัก
+Header ออกแบบให้ใหญ่ตอนอยู่บนสุดเพื่อให้ search bar เด่น แล้วหุบลงตอน scroll เพื่อคืนพื้นที่ให้เนื้อหา ส่วน search bar เป็นพระเอกของหน้า เลยทำหลายสถานะ ทั้งตอนปกติ (pill ใหญ่), ตอนกดใช้งาน (ขยายและโชว์ field ชัด), ตอน scroll (กลายเป็น compact) และมี hover state บอกว่ากำลังเลือก field ไหน
 
-Search bar เป็นส่วนที่สำคัญที่สุดของหน้า จึงมีการออกแบบให้มีหลายสถานะ เช่น
+Listing card ใช้รูปเป็นจุดเด่น มุมโค้ง ขนาดใกล้ reference และโชว์เฉพาะข้อมูลที่จำเป็น เช่น ชื่อ ราคา และ rating
 
-* ตอนปกติเป็น pill ขนาดใหญ่
-* ตอนกดใช้งานจะขยายและแสดง field แบบชัดเจน
-* ตอน scroll ลงมาจะกลายเป็น compact search bar
-* มี hover state เพื่อให้ผู้ใช้รู้ว่ากำลังเลือก field ไหนอยู่
+## 5. Design Tokens
 
-Listing card ใช้รูปภาพเป็นจุดเด่น มีมุมโค้ง ขนาดใกล้เคียง reference และมีข้อมูลเท่าที่จำเป็น เช่น ชื่อที่พัก ราคา จำนวนคน และ rating
+| ส่วน | ค่าโดยประมาณ |
+|---|---|
+| Header ตอนปกติ | ~196px (พื้นที่รวม search) |
+| Header ตอน scroll | ~74–82px |
+| Search pill compact | 48px |
+| Search pill expanded | 66px |
+| Border radius | 999px สำหรับ pill, ~12px สำหรับ card |
+| Border | `#dddddd` |
+| Text หลัก | `#222222` |
+| Muted text | `#717171` |
+| Background | `#ffffff` |
+| ปุ่มหลัก | `#111111` |
 
----
+ค่าสีและ spacing เก็บเป็น CSS custom properties ใน `:root` ของ `globals.css` และ CSS ส่วนใหญ่เขียนเป็น plain CSS
 
-## 4. Design Tokens
+## 6. โครงสร้าง State
 
-ค่าหลักของ design system ที่ใช้ในโปรเจกต์นี้มีดังนี้
+state สำคัญเกือบทั้งหมดของหน้า discovery รวมอยู่ใน hook เดียวคือ `useDiscovery` เช่น คำค้นหา, หมวดหมู่, วันที่, จำนวนแขก, ตัวกรอง, bounds ของแผนที่, รายการที่ hover/เลือก และสถานะ loading
 
-| ส่วน                 | ค่าโดยประมาณ                               |
-| -------------------- | ------------------------------------------ |
-| Header ตอนปกติ       | 196px                                      |
-| Header ตอน scroll    | 80px - 96px                                |
-| Search pill compact  | 48px                                       |
-| Search pill expanded | 66px - 78px                                |
-| Border radius หลัก   | 999px สำหรับ pill, 12px - 20px สำหรับ card |
-| Border color         | `#dddddd`                                  |
-| Muted text           | `#717171`                                  |
-| Text หลัก            | `#222222`                                  |
-| Background หลัก      | `#ffffff`                                  |
-| Search hover         | `#dddddd`                                  |
-| Search rest          | `#ebebeb`                                  |
-| Search active        | `#ffffff`                                  |
-| Primary button       | `#111111`                                  |
+การรวม state ไว้ที่เดียวทำให้ list กับ map ใช้ข้อมูลชุดเดียวกัน เลย sync กันง่าย เช่น hover card แล้ว marker active หรือ hover marker แล้ว card active โดยยังไม่ต้องใช้ global store และ debug ง่ายกว่า ส่วน wishlist ที่ผูกกับ account จะดึงผ่าน API หลังล็อกอิน ไม่ปนกับ state ฝั่ง UI
 
-โดยรวมแล้วสีที่ใช้จะคุมให้อยู่ในโทนขาว เทา ดำ เพื่อให้ดู clean และคล้าย modern travel platform
+## 7. Search และ Filtering
 
----
-
-## 5. โครงสร้าง State
-
-แนวคิดหลักคือให้หน้า discovery เป็นตัวกลางในการควบคุม state สำคัญทั้งหมด เช่น
-
-* คำค้นหา
-* หมวดหมู่ที่เลือก
-* วันที่
-* จำนวนแขก
-* รายการที่ hover
-* รายการที่เลือก
-* รายการ wishlist
-* สถานะ loading
-* bounds ของ map
-
-การเก็บ state ไว้ในหน้าเดียวช่วยให้ list และ map ใช้ข้อมูลชุดเดียวกันได้ง่าย เช่น เมื่อ hover card ก็ทำให้ marker บน map active ด้วย หรือเมื่อ hover marker ก็ทำให้ card ที่ตรงกัน active เช่นกัน
-
-แนวทางนี้ทำให้ไม่จำเป็นต้องใช้ global store ในช่วง prototype และยังทำให้ debug ง่ายขึ้น
-
----
-
-## 6. Search และ Filtering
-
-ระบบค้นหาตอนนี้ยังเป็น local search แต่โครงสร้างถูกออกแบบไว้ให้สามารถเปลี่ยนไปใช้ Meilisearch ได้ในอนาคต
+ระบบค้นหาใช้ Meilisearch เป็นหลัก โดย `lib/search.ts` จะส่ง query พร้อม filter ของหมวดหมู่ ช่วงราคา rating และกรอบพื้นที่ของแผนที่ (`_geoBoundingBox`) ไปที่ Meilisearch รวมถึงรองรับการ sort ตามราคา/คะแนน
 
 หลักการทำงานคือ
+1. ผู้ใช้พิมพ์ keyword หรือปรับ filter
+2. ระบบ debounce ค่าเล็กน้อยกันค้นหาถี่เกินไป
+3. ส่ง query + category + bounds + filter ไป Meilisearch
+4. แสดงผลเป็น listing card และ marker บนแผนที่
 
-1. ผู้ใช้พิมพ์ keyword หรือเลือก filter
-2. ระบบ debounce ค่าค้นหาเล็กน้อยเพื่อไม่ให้ค้นหาถี่เกินไป
-3. นำ query, category และ bounds ของ map ไป filter ข้อมูล
-4. แสดงผลลัพธ์เป็น listing card และ marker บน map
+มี request guard (นับ request id) กันไม่ให้ response เก่ากลับมาทับ response ใหม่ ซึ่งสำคัญเพราะตอนนี้เป็น async call จริง และถ้าเชื่อม Meilisearch ไม่ได้ (ไม่ได้ตั้ง host หรือ timeout) ระบบจะ fallback ไปใช้ `localSearch` ที่กรองจากข้อมูลในเครื่องแทน เพื่อให้หน้ายังใช้งานได้ นอกจากนี้ยังรองรับการค้นหาภาษาไทยด้วยการ map ชื่อย่านอังกฤษ–ไทยเข้าไปใน searchable text
 
-มีการใช้แนวคิด request guard เพื่อป้องกันปัญหา response เก่ากลับมาทับ response ใหม่ ซึ่งจะสำคัญมากถ้าในอนาคตเปลี่ยนจาก local search เป็น API จริง
+## 8. Map Strategy
 
----
+แผนที่ในเวอร์ชันนี้เป็น MapLibre GL จริง (ผ่าน `react-map-gl/maplibre`) ใช้ tile ฟรีจาก OpenFreeMap และโหลดแบบ dynamic (`ssr: false`) เพื่อไม่ให้ตัวแผนที่ไปถ่วงตอน render ฝั่ง server
 
-## 7. Map Strategy
+สิ่งที่ทำบนแผนที่
+- วาง marker ราคาตามพิกัด lat/lng ของแต่ละ listing
+- hover card แล้ว marker active และในทางกลับกัน
+- เลือก card แล้วแผนที่เลื่อนไปหา
+- ขยับ/zoom แผนที่แล้ว search ใหม่ตาม bounds
+- มี NavigationControl และโหมด dark (กลับสีด้วย CSS)
 
-ในเวอร์ชันนี้ map ยังไม่ได้ใช้ MapLibre หรือ Mapbox จริง แต่ใช้การจำลองตำแหน่งบนแผนที่ด้วย CSS และข้อมูล latitude/longitude
+หน้า detail ของแต่ละที่พักก็มีแผนที่แสดงตำแหน่งแยกอีกตัว (`DetailLocationMap`)
 
-ตำแหน่งของ marker คำนวณจาก bounds ของ map แล้วแปลงเป็น percentage เพื่อวาง marker บนพื้นที่แผนที่
+## 9. Animation
 
-ถึงจะยังไม่ใช่แผนที่จริง แต่ logic หลักที่สำคัญถูกเตรียมไว้แล้ว เช่น
+Animation ใช้ CSS เป็นหลัก ไม่ได้เพิ่ม library อย่าง Framer Motion เพราะส่วนใหญ่เป็น transition พื้นฐาน เช่น search bar morph, header shrink, scrim fade, modal slide, card carousel, marker hover, skeleton และ category underline
 
-* วาง marker ตามตำแหน่ง
-* hover card แล้ว marker active
-* hover marker แล้ว card active
-* เลือก card แล้ว map recenter
-* ขยับ map แล้ว filter ใหม่ตาม bounds
+ข้อดีคือ bundle เบากว่าและคุม timing ได้ง่าย ค่า easing หลักเป็นแนว soft deceleration เพื่อให้ขยับนุ่ม ๆ ใกล้ฟีลของ Airbnb
 
-ถ้าจะนำไป production จริง ควรเปลี่ยนเป็น MapLibre GL JS เพื่อให้มี tile map, zoom, clustering และการ flyTo ที่ smooth กว่า
+## 10. Loading และ Empty State
 
----
+มี skeleton loading ระหว่างโหลดข้อมูล โดยทำ aspect ratio ให้ใกล้ card จริง เพื่อลด layout shift เวลาข้อมูลโผล่มา ถ้าค้นหาแล้วไม่เจออะไร จะมี empty state พร้อมข้อความอธิบายและปุ่มให้กลับไปเริ่มค้นหาใหม่
 
-## 8. Animation
+## 11. Wishlist และ Auth
 
-Animation ในโปรเจกต์นี้ใช้ CSS เป็นหลัก ไม่ได้ใช้ library เพิ่ม เช่น Framer Motion
+ผู้ใช้สมัครสมาชิก/ล็อกอินด้วยอีเมล–รหัสผ่านผ่าน NextAuth (Credentials) รหัสผ่านถูก hash ด้วย scrypt และเก็บข้อมูล user เป็นไฟล์ JSON ส่วนรูปโปรไฟล์เสิร์ฟผ่าน API แยก
 
-เหตุผลคือ animation ที่ใช้ส่วนใหญ่เป็น transition พื้นฐาน เช่น
+Wishlist ทำงานหลังล็อกอินเท่านั้น กดหัวใจที่ card แล้วระบบจะบันทึกลง Postgres (ตาราง `wishlists`) แล้วเอาไปแสดงในหน้า Wishlist ได้ ถ้าต่อ Postgres ไม่ได้ (เช่นยังไม่เปิด Docker) ระบบจะ fallback ไปเก็บเป็นไฟล์ JSON ชั่วคราว เพื่อไม่ให้ปุ่มหัวใจพังหรือขึ้น error
 
-* search bar morph
-* header shrink
-* scrim fade
-* modal slide
-* card carousel
-* marker hover
-* skeleton loading
-* category underline
+## 12. Accessibility
 
-การใช้ CSS ทำให้ bundle เบากว่า และยังควบคุม timing ได้ง่าย
+ดูแล accessibility พื้นฐานไว้ เช่น
+- ปุ่มไอคอนมี `aria-label`
+- modal มี `role` และ aria ที่เหมาะสม
+- grid ผลลัพธ์มี `aria-live`, ตอนโหลดมี `aria-busy`
+- ปุ่มและ input มี focus visible
+- รองรับ `prefers-reduced-motion`
 
-ค่า easing หลักที่ใช้คือแนว soft deceleration เพื่อให้ movement ดูนุ่ม ไม่กระตุก และใกล้กับ feel ของ Airbnb
+ช่วยให้คนที่ใช้ keyboard หรือ assistive technology ใช้งานได้ดีขึ้น
 
----
+## 13. Tradeoffs
 
-## 9. Loading และ Empty State
+| สิ่งที่เลือกทำ | เหตุผล | ข้อแลกเปลี่ยน |
+|---|---|---|
+| Animation ด้วย CSS | เบาและคุมง่าย | ยังไม่มี spring physics |
+| รวม state ใน `useDiscovery` | sync list/map ง่าย | ถ้าโปรเจกต์ใหญ่ขึ้นอาจต้องแยก store |
+| user store เป็นไฟล์ JSON | ทำได้เร็ว ไม่ต้องตั้ง schema | ไม่เหมาะ production ควรย้ายเข้า DB |
+| Meilisearch + local fallback | ใช้งานได้แม้ยังไม่เปิด service | ผล fallback ไม่ครบเท่า engine จริง |
+| ใช้ font open-source | ไม่มีปัญหา license | metric ไม่เหมือน Airbnb 100% |
 
-โปรเจกต์นี้มี skeleton loading เพื่อให้ตอนโหลดข้อมูล หน้าไม่กระโดดหรือ layout shift
+## 14. ข้อจำกัดปัจจุบัน
 
-Skeleton ถูกออกแบบให้มี aspect ratio ใกล้กับ card จริง เมื่อโหลดเสร็จแล้วจึงแทนที่ด้วยข้อมูลจริงได้ทันทีโดยไม่ทำให้หน้าเว็บขยับเยอะ
+- ระบบ user/auth ยังเก็บเป็นไฟล์ JSON ควรย้ายเข้า Postgres ให้ครบ
+- ยังไม่มี marker clustering บนแผนที่ตอน zoom out
+- search bar บาง animation ยังไม่เป๊ะเท่า reference
+- ยังไม่มี URL state sync สำหรับ query/filter/map (แชร์ลิงก์ผลค้นหายังไม่ได้)
+- responsive บางจุดยังต้อง polish เพิ่ม
 
-กรณีที่ไม่พบข้อมูล จะมี empty state พร้อมข้อความอธิบายและปุ่มให้ผู้ใช้กลับไปเริ่มค้นหาใหม่
+## 15. สิ่งที่ควรทำต่อ
 
----
+1. ย้าย user/auth จากไฟล์ JSON เข้า Postgres ทั้งหมด
+2. ทำ URL state sync เพื่อแชร์ลิงก์ผลการค้นหาได้
+3. เพิ่ม marker clustering บนแผนที่
+4. ปรับ animation ของ search bar ให้ใกล้ reference มากขึ้น
+5. เพิ่ม keyboard navigation ใน listing grid
+6. เขียน test ให้ flow หลัก ๆ
 
-## 10. Wishlist
+## 16. สรุป
 
-Wishlist ใช้สำหรับให้ผู้ใช้บันทึกรายการที่สนใจ โดยกดปุ่มหัวใจบน card
+The Nomad Space เป็น discovery platform ที่เน้นประสบการณ์ค้นหาที่พักและบริการแบบ modern travel website จุดเด่นคือ UI ที่ใกล้ reference, search bar และ navbar หลาย state, การ sync ระหว่าง list กับ map จริง, ระบบล็อกอินและ wishlist ที่ผูกกับ account รวมถึงการต่อ Meilisearch และ Postgres เข้ามาจริง
 
-ข้อมูล wishlist ถูกแสดงในหน้า Wishlist และสามารถจัดกลุ่มตามชื่อ wishlist ได้
-
-ในเชิง production ควรให้ wishlist เก็บใน backend หรือ database จริง เพื่อให้ข้อมูลยังอยู่หลัง refresh และสามารถ sync กับ account ของผู้ใช้ได้
-
----
-
-## 11. Accessibility
-
-โปรเจกต์นี้คำนึงถึง accessibility พื้นฐาน เช่น
-
-* ปุ่ม icon มี `aria-label`
-* modal มี role และ aria ที่เหมาะสม
-* grid ผลลัพธ์มี `aria-live`
-* loading state มี `aria-busy`
-* ปุ่มและ input มี focus visible
-* รองรับ `prefers-reduced-motion`
-
-สิ่งเหล่านี้ช่วยให้ผู้ใช้ที่ใช้ keyboard หรือ assistive technology สามารถใช้งานได้ดีขึ้น
-
----
-
-## 12. Tradeoffs
-
-| สิ่งที่เลือกทำ         | เหตุผล                             | ข้อแลกเปลี่ยน                       |
-| ---------------------- | ---------------------------------- | ----------------------------------- |
-| ใช้ CSS animation      | เบาและควบคุมง่าย                   | ยังไม่มี spring physics             |
-| ใช้ CSS map            | ไม่ต้องใช้ token หรือ external map | ยังไม่ใช่แผนที่จริง                 |
-| ใช้ local search       | ทำ prototype ได้เร็ว               | ยังไม่ใช่ search engine จริง        |
-| เก็บ state ในหน้าเดียว | sync list/map ง่าย                 | ถ้าโปรเจกต์ใหญ่ขึ้นอาจต้องแยก store |
-| ใช้ font open-source   | ใช้ได้จริง ไม่มี license issue     | metric ไม่เหมือน Airbnb 100%        |
-
----
-
-## 13. ข้อจำกัดปัจจุบัน
-
-สิ่งที่ยังไม่สมบูรณ์หรือควรปรับต่อ ได้แก่
-
-* ยังไม่ได้ใช้ Meilisearch จริง
-* Map ยังเป็น CSS map ไม่ใช่ tile map จริง
-* ยังไม่มี marker clustering
-* Search bar บาง animation ยังไม่เหมือน reference 100%
-* Wishlist บางส่วนยังต้องพึ่ง backend ให้เสถียรกว่านี้
-* ยังไม่มี URL state sync สำหรับ query/filter/map
-* ยังต้อง polish responsive layout เพิ่มในบางจุด
-
----
-
-## 14. สิ่งที่ควรทำต่อ
-
-ถ้ามีเวลาพัฒนาต่อ สิ่งที่ควรทำเป็นลำดับถัดไปคือ
-
-1. เชื่อม MapLibre GL JS เพื่อใช้แผนที่จริง
-2. เชื่อม Meilisearch สำหรับ search/filter จริง
-3. ทำ URL state sync เพื่อให้แชร์ลิงก์ผลการค้นหาได้
-4. ทำ wishlist persistence ให้สมบูรณ์
-5. เพิ่ม marker clustering
-6. ปรับ search bar animation ให้ใกล้ reference มากขึ้น
-7. เพิ่ม keyboard navigation ใน listing grid
-8. แยก component และ logic ให้เป็นระบบมากขึ้น
-
----
-
-## 15. สรุป
-
-The Nomad Space เป็นโปรเจกต์ discovery platform ที่เน้นประสบการณ์การค้นหาที่พักและบริการแบบ modern travel website
-
-จุดเด่นของงานนี้คือการออกแบบ UI ให้ใกล้ reference, การทำ search bar และ navbar ที่มีหลาย state, การ sync ระหว่าง list กับ map, การมี skeleton loading และการเตรียม architecture ให้ต่อยอดกับ backend หรือ search engine จริงได้
-
-โดยรวมแล้วโปรเจกต์นี้ยังเป็น prototype แต่มีโครงสร้างและ UX หลักที่พร้อมต่อยอดไปเป็นระบบจริงได้
+โดยรวมงานนี้พัฒนาเกินระดับ prototype ไปแล้ว มีทั้งฝั่ง UI และ backend ที่ทำงานได้จริง และวางโครงไว้ให้ต่อยอดเป็นระบบเต็มได้ไม่ยาก

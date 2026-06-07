@@ -8,19 +8,6 @@ import { useLanguage } from "@/lib/i18n";
 
 type AuthMode = "login" | "register";
 
-const posterCities = [
-  "Paris",
-  "Bangkok",
-  "Tokyo",
-  "Miami",
-  "Osaka",
-  "Seoul",
-  "London",
-  "Sydney",
-  "Chiang Mai",
-  "Phuket",
-];
-
 export default function AuthPage() {
   const router = useRouter();
   const { status } = useSession();
@@ -91,12 +78,6 @@ export default function AuthPage() {
 
   return (
     <main className="auth-page">
-      <div className="auth-poster-grid" aria-hidden="true">
-        {posterCities.map((city) => (
-          <span key={city}>{city}</span>
-        ))}
-      </div>
-
       <section className="auth-panel" aria-labelledby="auth-title">
         <Link className="auth-brand" href="/" aria-label="The Nomad Space home">
           <svg viewBox="0 0 32 32" aria-hidden="true">

@@ -20,7 +20,9 @@ export function LocationSuggest({ query, onSelect, onNearby, variant = "default"
   const { t } = useLanguage();
   const q = query.toLowerCase().trim();
   const isExperience = variant === "experience";
-  const suggestions = isExperience ? buildExperienceSuggestions() : buildSuggestions(t.locations.suggestions);
+  const suggestions = isExperience
+    ? buildSuggestions(t.locations.experienceSuggestions)
+    : buildSuggestions(t.locations.suggestions);
   const filtered = q
     ? suggestions.filter(
         (suggestion) =>
@@ -46,7 +48,7 @@ export function LocationSuggest({ query, onSelect, onNearby, variant = "default"
           />
         )}
         {destinationSuggestions.length > 0 && (
-          <p className="location-suggest-heading">จุดหมายปลายทางแนะนำ</p>
+          <p className="location-suggest-heading">{t.locations.experienceHeading}</p>
         )}
         {destinationSuggestions.map((suggestion) => (
           <LocationSuggestButton
@@ -107,47 +109,6 @@ function LocationSuggestButton({
       </span>
     </button>
   );
-}
-
-function buildExperienceSuggestions(): Suggestion[] {
-  return [
-    {
-      id: "nearby",
-      name: "บริเวณใกล้เคียง",
-      desc: "ค้นหาในบริเวณใกล้เคียง",
-      icon: <NearbyIcon />,
-    },
-    {
-      id: "tokyo",
-      name: "โตเกียว, ญี่ปุ่น",
-      desc: "เด่นเรื่องแลนด์มาร์คอย่าง ตึกคอนโดทาวเวอร์โตเกียว",
-      icon: <NeighborhoodIcon color="#1f8f46" />,
-    },
-    {
-      id: "osaka",
-      name: "โอซากะ, ญี่ปุ่น",
-      desc: "มีสีสันยามค่ำคืน",
-      icon: <NeighborhoodIcon color="#ef8a3a" />,
-    },
-    {
-      id: "chiang mai",
-      name: "เชียงใหม่, ประเทศไทย",
-      desc: "เหมาะกับสายธรรมชาติ",
-      icon: <NeighborhoodIcon color="#b4574f" />,
-    },
-    {
-      id: "sapporo",
-      name: "ซัปโปโร, ญี่ปุ่น",
-      desc: "เด่นเรื่องแลนด์มาร์คอย่าง หอนาฬิกาซัปโปโร",
-      icon: <NeighborhoodIcon color="#9b5b54" />,
-    },
-    {
-      id: "shinjuku",
-      name: "ชินจูกุ, ญี่ปุ่น",
-      desc: "เด่นเรื่องร้านอาหารรสเลิศ",
-      icon: <NeighborhoodIcon color="#4c9f52" />,
-    },
-  ];
 }
 
 function buildSuggestions(items: readonly { id: string; name: string; desc: string }[]): Suggestion[] {
