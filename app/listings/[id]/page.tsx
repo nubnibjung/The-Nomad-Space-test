@@ -480,7 +480,9 @@ function DetailHeader({ isHidden }: { isHidden: boolean }) {
       </Link>
 
       <div className="detail-top-actions">
-        <Link href="/auth" className="detail-top-host">{session ? t.nav.hostMode : t.nav.host}</Link>
+        {!session && (
+          <Link href="/auth" className="detail-top-host">{t.nav.host}</Link>
+        )}
         <div className="auth-menu" ref={menuRef}>
           <button
             className="detail-top-icon"

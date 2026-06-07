@@ -7117,6 +7117,11 @@ input:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  scrollbar-width: none; /* Firefox */
+}
+
+.profile-modal-body::-webkit-scrollbar {
+  display: none; /* Chrome / Safari / Edge */
 }
 
 .profile-form-group {
@@ -7142,8 +7147,8 @@ input:focus-visible {
 }
 
 .profile-form-input:focus {
-  border-color: #222222;
-  box-shadow: 0 0 0 2px #22222215;
+  border-color: #b0b0b0;
+  box-shadow: none;
 }
 
 /* Avatar presets styling */

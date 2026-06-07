@@ -338,9 +338,11 @@ export function Header({
           </div>
 
           <div className="header-actions">
-            <Link className="host-link hide-mobile" href="/auth">
-              {session ? t.nav.hostMode : t.nav.host}
-            </Link>
+            {!session && (
+              <Link className="host-link hide-mobile" href="/auth">
+                {t.nav.host}
+              </Link>
+            )}
 
             {session ? (
               <Link
