@@ -496,7 +496,7 @@ export function Header({
                     e.stopPropagation();
                     onDateChange({ start: null, end: null });
                     setDatePickerMode("dates");
-                    openSearchStep("where");
+                    openSearchStep("when");
                   }}
                 >
                   <i className="bi bi-x-lg" aria-hidden="true" />
@@ -544,7 +544,7 @@ export function Header({
                     } else {
                       onGuestReset();
                     }
-                    openSearchStep("where");
+                    openSearchStep("who");
                   }}
                 >
                   <i className="bi bi-x-lg" aria-hidden="true" />
